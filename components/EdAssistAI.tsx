@@ -17,9 +17,6 @@ const EdAssistAI: React.FC<EdAssistAIProps> = ({ contextData, isOpen, onClose, i
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Setup Gemini
-  const apiKey = process.env.API_KEY || '';
-  
   // Handle initial prompt trigger for demos
   useEffect(() => {
     if (isOpen && initialPrompt) {
@@ -31,6 +28,18 @@ const EdAssistAI: React.FC<EdAssistAIProps> = ({ contextData, isOpen, onClose, i
     const textToSend = msgOverride || input;
     if (!textToSend.trim()) return;
     
+    // Safer environment variable access
+    let apiKey: string | undefined;
+    try {
+      // @ts-ignore
+      if (typeof process !== 'undefined' && process.env) {
+        // @ts-ignore
+        apiKey = process.env.API_KEY;
+      }
+    } catch (e) {
+      console.warn("Could not access process.env");
+    }
+
     if (!apiKey) {
       setError("API Key is missing. Please configure process.env.API_KEY.");
       return;
