@@ -12,8 +12,9 @@ export interface Goal {
   title: string;
   description: string;
   progress: number; // 0-100
-  type: 'Academic' | 'Personal' | 'IEP/504';
+  type: 'Academic' | 'Personal' | 'IEP/504' | 'College/Career';
   dueDate: string;
+  status?: 'In Progress' | 'Completed';
 }
 
 export interface Artifact {
@@ -23,6 +24,12 @@ export interface Artifact {
   url: string;
   date: string;
   tags: string[];
+  linkedGoalId?: string;
+}
+
+export interface RiskHistoryPoint {
+  period: string; // "2022", "2023" or "Aug", "Sep"
+  score: number;
 }
 
 export interface Student {
@@ -33,8 +40,13 @@ export interface Student {
   attendance: number; // percentage
   riskScore: number; // EWIS Score (0-100)
   goals: Goal[];
+  historicGoals: Goal[];
   artifacts: Artifact[];
   iepStatus?: boolean;
+  riskHistory: {
+    monthly: RiskHistoryPoint[];
+    yearly: RiskHistoryPoint[];
+  };
 }
 
 export interface AnalyticData {

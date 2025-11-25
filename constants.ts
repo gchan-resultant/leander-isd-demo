@@ -1,4 +1,4 @@
-import { Student, Goal, Artifact, AnalyticData } from './types';
+import { Student, AnalyticData } from './types';
 
 export const MOCK_STUDENT: Student = {
   id: 'S12345',
@@ -15,7 +15,8 @@ export const MOCK_STUDENT: Student = {
       description: 'Increase NWEA MAP Math score from 230 to 245 by end of semester.',
       progress: 65,
       type: 'Academic',
-      dueDate: '2025-12-15'
+      dueDate: '2025-12-15',
+      status: 'In Progress'
     },
     {
       id: 'g2',
@@ -23,27 +24,63 @@ export const MOCK_STUDENT: Student = {
       description: 'Accommodated reading goal per 504 plan: Read 150 wpm.',
       progress: 80,
       type: 'IEP/504',
-      dueDate: '2025-11-30'
+      dueDate: '2025-11-30',
+      status: 'In Progress'
+    }
+  ],
+  historicGoals: [
+    {
+      id: 'h1',
+      title: 'Biology Lab Safety',
+      description: 'Complete all safety modules with 100% accuracy.',
+      progress: 100,
+      type: 'Academic',
+      dueDate: '2024-05-20',
+      status: 'Completed'
+    },
+    {
+      id: 'h2',
+      title: 'Join Robotics Club',
+      description: 'Participate in at least 3 regional meets.',
+      progress: 100,
+      type: 'Personal',
+      dueDate: '2024-04-15',
+      status: 'Completed'
     }
   ],
   artifacts: [
     {
       id: 'a1',
-      title: 'Robotics Project Diagram',
-      type: 'image',
-      url: 'https://picsum.photos/400/300',
+      title: 'Math Assessment - Unit 4',
+      type: 'document',
+      url: '#',
       date: '2025-10-12',
-      tags: ['STEM', 'Collaboration']
+      tags: ['Math', 'Assessment'],
+      linkedGoalId: 'g1'
     },
     {
       id: 'a2',
-      title: 'History Essay - Texas Revolution',
-      type: 'document',
-      url: 'https://picsum.photos/400/300?grayscale',
+      title: 'Reading Fluency Check',
+      type: 'video',
+      url: '#',
       date: '2025-09-20',
-      tags: ['Writing', 'History']
+      tags: ['Reading', 'Video'],
+      linkedGoalId: 'g2'
     }
-  ]
+  ],
+  riskHistory: {
+    monthly: [
+        { period: 'Aug', score: 45 },
+        { period: 'Sep', score: 42 },
+        { period: 'Oct', score: 38 },
+        { period: 'Nov', score: 35 }, // Improving (Lower is better)
+    ],
+    yearly: [
+        { period: '2022-23', score: 55 },
+        { period: '2023-24', score: 42 },
+        { period: '2024-25', score: 35 },
+    ]
+  }
 };
 
 export const CLASS_ROSTER: Student[] = [

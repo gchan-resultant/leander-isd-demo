@@ -112,7 +112,7 @@ const App: React.FC = () => {
 
           {/* Right Side User Info & Demo Toggle */}
           <div className="flex items-center space-x-4">
-             {/* Presenter Mode Toggle */}
+             {/* Presenter Mode Toggle - HIDDEN FOR NOW
              <button
                 onClick={() => setShowDemoGuide(!showDemoGuide)}
                 className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold transition ${
@@ -125,6 +125,7 @@ const App: React.FC = () => {
                 <Presentation size={14} />
                 <span>{showDemoGuide ? 'Presenter Mode: ON' : 'Presenter Mode'}</span>
              </button>
+             */}
 
             <div className="hidden md:flex flex-col items-end border-l border-gray-200 pl-4">
                {appVersion === 'future' ? (
