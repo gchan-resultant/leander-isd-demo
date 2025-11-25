@@ -1,13 +1,50 @@
+
 import React, { useState } from 'react';
 import { MOCK_STUDENT } from '../constants';
-import { Globe, TrendingUp, Activity, CheckCircle, Calendar, Mail, FileText, History, X, Printer, School } from 'lucide-react';
+import { Globe, TrendingUp, Activity, CheckCircle, Calendar, Mail, FileText, History, X, Printer, School, Sparkles } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import EdAssistAI from './EdAssistAI';
 
 const ParentView: React.FC = () => {
   const [language, setLanguage] = useState<'en' | 'es'>('en');
   const [chartMode, setChartMode] = useState<'yearly' | 'monthly'>('yearly');
   const [isReportCardOpen, setIsReportCardOpen] = useState(false);
+  
+  // AI State
+  const [isAiOpen, setIsAiOpen] = useState(false);
+  const [aiPrompt, setAiPrompt] = useState<string | undefined>(undefined);
+
   const student = MOCK_STUDENT;
+
+  // Mock Report Card Data
+  const reportCardData = [
+    { period: 1, course: "English II", teacher: "Mrs. Davis", grade: 88, absences: 1 },
+    { period: 2, course: "Algebra I", teacher: "Mr. Thompson", grade: 79, absences: 2 },
+    { period: 3, course: "Biology", teacher: "Ms. Garcia", grade: 92, absences: 0 },
+    { period: 4, course: "World History", teacher: "Mr. Roberts", grade: 85, absences: 1 },
+    { period: 5, course: "Art I", teacher: "Mrs. Wilson", grade: 98, absences: 0 },
+    { period: 6, course: "PE", teacher: "Coach Miller", grade: 100, absences: 0 },
+  ];
+
+  // Context for AI
+  const parentContext = `
+    Role: Parent of ${student.name}.
+    Student Data:
+    - Grade: ${student.grade}
+    - Attendance: ${student.attendance}%
+    - GPA: ${student.gpa}
+    - Risk Score: ${student.riskScore} (EWIS - Early Warning Indicator. 0-100, lower is better).
+    - Goals: ${student.goals.map(g => `${g.title} (${g.progress}%)`).join(', ')}
+    - Recent Grades (Report Card): ${JSON.stringify(reportCardData)}
+    
+    Goal: Help the parent understand their child's progress, explain educational terms (like RIT, IEP, 504), and suggest ways to support learning at home.
+    Language Preference: ${language === 'es' ? 'Spanish' : 'English'}.
+  `;
+
+  const launchAi = (prompt?: string) => {
+      setAiPrompt(prompt);
+      setIsAiOpen(true);
+  };
 
   const translations = {
     en: {
@@ -121,22 +158,15 @@ const ParentView: React.FC = () => {
     return map[text] || text;
   };
 
-  // Mock Report Card Data
-  const reportCardData = [
-    { period: 1, course: "English II", teacher: "Mrs. Davis", grade: 88, absences: 1 },
-    { period: 2, course: "Algebra I", teacher: "Mr. Thompson", grade: 79, absences: 2 },
-    { period: 3, course: "Biology", teacher: "Ms. Garcia", grade: 92, absences: 0 },
-    { period: 4, course: "World History", teacher: "Mr. Roberts", grade: 85, absences: 1 },
-    { period: 5, course: "Art I", teacher: "Mrs. Wilson", grade: 98, absences: 0 },
-    { period: 6, course: "PE", teacher: "Coach Miller", grade: 100, absences: 0 },
-  ];
-
   return (
-    <div className="p-6 max-w-7xl mx-auto space-y-8 pb-24">
+    <div className="relative min-h-screen bg-gray-50">
       
+      {/* EdAssist AI Sidebar */}
+      <EdAssistAI isOpen={isAiOpen} onClose={() => setIsAiOpen(false)} contextData={parentContext} initialPrompt={aiPrompt} />
+
       {/* Report Card / IEP Modal */}
       {isReportCardOpen && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fadeIn">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[70] flex items-center justify-center p-4 animate-fadeIn">
             <div className="bg-white rounded-xl shadow-2xl max-w-3xl w-full overflow-hidden flex flex-col max-h-[90vh]">
                 <div className="bg-blue-600 p-4 flex justify-between items-center text-white">
                     <div className="flex items-center gap-2">
@@ -204,171 +234,184 @@ const ParentView: React.FC = () => {
         </div>
       )}
 
-      {/* Top Bar */}
-      <div className="flex justify-between items-center bg-white p-4 rounded-xl shadow-sm border border-gray-200">
-        <div>
-            <h1 className="text-2xl font-bold text-gray-900">{t.welcome} <span className="text-blue-600">{student.name}</span></h1>
-            <p className="text-gray-500 text-sm">ID: {student.id} | Grade: {student.grade}</p>
-        </div>
-        <button
-            onClick={() => setLanguage(prev => prev === 'en' ? 'es' : 'en')}
-            className="flex items-center space-x-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg text-gray-700 transition"
-        >
-            <Globe size={18} />
-            <span className="font-medium">{language === 'en' ? 'Español' : 'English'}</span>
-        </button>
-      </div>
-
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex items-center space-x-4">
-            <div className="p-3 bg-green-100 rounded-full text-green-600">
-                <Calendar size={24} />
-            </div>
-            <div>
-                <p className="text-sm text-gray-500">{t.attendance}</p>
-                <h3 className="text-2xl font-bold text-gray-900">{student.attendance}%</h3>
-            </div>
-        </div>
-
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex items-center space-x-4">
-            <div className={`p-3 rounded-full ${student.riskScore > 50 ? 'bg-orange-100 text-orange-600' : 'bg-blue-100 text-blue-600'}`}>
-                {student.riskScore > 50 ? <Activity size={24} /> : <CheckCircle size={24} />}
-            </div>
-            <div>
-                <p className="text-sm text-gray-500">{t.risk}</p>
-                <h3 className="text-2xl font-bold text-gray-900">{student.riskScore > 50 ? t.status.risk : t.status.track}</h3>
-            </div>
-        </div>
-
-        {/* IEP / 504 Tile */}
-        <div 
-            onClick={() => setIsReportCardOpen(true)}
-            className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex items-center justify-between cursor-pointer hover:border-purple-300 hover:shadow-md transition group active:scale-95"
-        >
-            <div className="flex items-center gap-4">
-                <div className="p-3 bg-purple-100 rounded-full text-purple-600 group-hover:bg-purple-600 group-hover:text-white transition">
-                    <FileText size={24} />
-                </div>
+      {/* Content Wrapper with Shift */}
+      <div className={`transition-all duration-300 ease-in-out ${isAiOpen ? 'mr-0 md:mr-[450px]' : ''}`}>
+        <div className="p-6 max-w-7xl mx-auto space-y-8 pb-24">
+            {/* Top Bar */}
+            <div className="flex justify-between items-center bg-white p-4 rounded-xl shadow-sm border border-gray-200">
                 <div>
-                    <p className="text-sm text-gray-500">{t.iep}</p>
-                    <h3 className="text-lg font-bold text-gray-900 group-hover:text-purple-700 transition">{t.viewReport}</h3>
+                    <h1 className="text-2xl font-bold text-gray-900">{t.welcome} <span className="text-blue-600">{student.name}</span></h1>
+                    <p className="text-gray-500 text-sm">ID: {student.id} | Grade: {student.grade}</p>
+                </div>
+                <div className="flex items-center gap-3">
+                    <button 
+                        onClick={() => launchAi()}
+                        className="px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg font-medium shadow-md flex items-center gap-2 transition hover:shadow-lg hover:brightness-110"
+                    >
+                        <Sparkles size={18} /> Launch EdAssist AI
+                    </button>
+                    <button
+                        onClick={() => setLanguage(prev => prev === 'en' ? 'es' : 'en')}
+                        className="flex items-center space-x-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg text-gray-700 transition"
+                    >
+                        <Globe size={18} />
+                        <span className="font-medium">{language === 'en' ? 'Español' : 'English'}</span>
+                    </button>
                 </div>
             </div>
-        </div>
 
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex items-center justify-between">
-            <div>
-                <p className="text-sm text-gray-500">Next Conference</p>
-                <h3 className="text-lg font-bold text-gray-900">Nov 15, 4:00 PM</h3>
-            </div>
-            <button className="text-blue-600 hover:bg-blue-50 p-2 rounded-full transition">
-                <Mail size={20} />
-            </button>
-        </div>
-      </div>
-
-      {/* Main Chart - Full Width */}
-      <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
-        <div className="flex items-center justify-between mb-6">
-            <h3 className="font-bold text-lg text-gray-800 flex items-center gap-2">
-                <Activity size={20} className="text-orange-500"/> {t.ewis}
-            </h3>
-            <div className="flex bg-gray-100 rounded-lg p-1 text-xs font-bold">
-                <button 
-                    onClick={() => setChartMode('yearly')}
-                    className={`px-3 py-1.5 rounded transition ${chartMode === 'yearly' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-500'}`}
-                >
-                    {t.chart.yearly}
-                </button>
-                <button 
-                    onClick={() => setChartMode('monthly')}
-                    className={`px-3 py-1.5 rounded transition ${chartMode === 'monthly' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-500'}`}
-                >
-                    {t.chart.monthly}
-                </button>
-            </div>
-        </div>
-        
-        <div className="h-72 w-full">
-            <ResponsiveContainer width="100%" height="100%">
-                <LineChart 
-                    data={chartMode === 'yearly' ? student.riskHistory.yearly : student.riskHistory.monthly} 
-                    margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
-                >
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
-                    <XAxis dataKey="period" tick={{ fontSize: 12 }} axisLine={false} tickLine={false} dy={10} />
-                    <YAxis 
-                        domain={[0, 100]} 
-                        tick={{ fontSize: 12 }} 
-                        axisLine={false} 
-                        tickLine={false} 
-                        label={{ value: t.chart.axis, angle: -90, position: 'insideLeft', style: {fontSize: 10, fill: '#9ca3af'} }}
-                    />
-                    <Tooltip contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
-                    <Line 
-                        type="monotone" 
-                        dataKey="score" 
-                        name="Risk Score" 
-                        stroke={chartMode === 'yearly' ? '#3b82f6' : '#f59e0b'} 
-                        strokeWidth={3} 
-                        dot={{ r: 6, strokeWidth: 2, fill: '#fff' }} 
-                        activeDot={{ r: 8 }}
-                    />
-                </LineChart>
-            </ResponsiveContainer>
-        </div>
-        <p className="text-xs text-gray-400 mt-4 italic text-center">
-            {t.chart.footer}
-        </p>
-      </div>
-
-      {/* Goals Row - Split 2/3 and 1/3 */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        
-        {/* Active Goals (2/3 Width) */}
-        <div className="lg:col-span-2 bg-white p-6 rounded-xl shadow-sm border border-gray-200 flex flex-col">
-            <h3 className="font-bold text-lg text-gray-800 mb-6 flex items-center gap-2">
-                <TrendingUp size={20} className="text-blue-600"/> {t.goals}
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 flex-1">
-                {student.goals.map(goal => (
-                    <div key={goal.id} className="bg-gray-50 rounded-xl p-5 border border-gray-100 hover:border-blue-200 transition">
-                        <div className="flex justify-between items-start mb-2">
-                            <span className={`text-[10px] px-2 py-1 rounded-full font-bold uppercase tracking-wide ${goal.type === 'IEP/504' ? 'bg-purple-100 text-purple-600' : 'bg-blue-100 text-blue-600'}`}>
-                                {translateGoalText(goal.type)}
-                            </span>
-                            <span className="text-xs font-bold text-gray-400">{goal.progress}%</span>
-                        </div>
-                        <h4 className="font-bold text-gray-900 mb-2 text-lg leading-tight">{translateGoalText(goal.title)}</h4>
-                        <p className="text-sm text-gray-500 mb-4 line-clamp-2">{translateGoalText(goal.description)}</p>
-                        <div className="w-full bg-gray-200 rounded-full h-2">
-                            <div className={`h-2 rounded-full ${goal.type === 'IEP/504' ? 'bg-purple-500' : 'bg-blue-600'}`} style={{width: `${goal.progress}%`}}></div>
-                        </div>
+            {/* Stats Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex items-center space-x-4">
+                    <div className="p-3 bg-green-100 rounded-full text-green-600">
+                        <Calendar size={24} />
                     </div>
-                ))}
-            </div>
-        </div>
+                    <div>
+                        <p className="text-sm text-gray-500">{t.attendance}</p>
+                        <h3 className="text-2xl font-bold text-gray-900">{student.attendance}%</h3>
+                    </div>
+                </div>
 
-        {/* Past Achievements (1/3 Width) */}
-        <div className="lg:col-span-1 bg-slate-50 p-6 rounded-xl shadow-inner border border-gray-200">
-            <h3 className="font-bold text-lg text-slate-700 mb-6 flex items-center gap-2">
-                <History size={20} className="text-slate-500"/> {t.historic}
-            </h3>
-            <div className="space-y-4">
-                {student.historicGoals.map(goal => (
-                    <div key={goal.id} className="flex items-start gap-3 bg-white p-3 rounded-lg border border-gray-100 shadow-sm opacity-90 hover:opacity-100 transition">
-                        <div className="mt-1 text-green-500 bg-green-50 p-1 rounded-full"><CheckCircle size={14} /></div>
+                <div onClick={() => launchAi("Can you explain what the 'Risk Score' means and why it is at " + student.riskScore + "?")} className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex items-center space-x-4 cursor-pointer hover:shadow-md hover:border-blue-200 transition">
+                    <div className={`p-3 rounded-full ${student.riskScore > 50 ? 'bg-orange-100 text-orange-600' : 'bg-blue-100 text-blue-600'}`}>
+                        {student.riskScore > 50 ? <Activity size={24} /> : <CheckCircle size={24} />}
+                    </div>
+                    <div>
+                        <p className="text-sm text-gray-500">{t.risk}</p>
+                        <h3 className="text-2xl font-bold text-gray-900">{student.riskScore > 50 ? t.status.risk : t.status.track}</h3>
+                    </div>
+                </div>
+
+                {/* IEP / 504 Tile */}
+                <div 
+                    onClick={() => setIsReportCardOpen(true)}
+                    className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex items-center justify-between cursor-pointer hover:border-purple-300 hover:shadow-md transition group active:scale-95"
+                >
+                    <div className="flex items-center gap-4">
+                        <div className="p-3 bg-purple-100 rounded-full text-purple-600 group-hover:bg-purple-600 group-hover:text-white transition">
+                            <FileText size={24} />
+                        </div>
                         <div>
-                            <h4 className="font-bold text-sm text-slate-800">{translateGoalText(goal.title)}</h4>
-                            <p className="text-xs text-slate-500 mt-0.5 mb-1">{translateGoalText(goal.description)}</p>
-                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wide">{t.historicCompleted}: {goal.dueDate}</p>
+                            <p className="text-sm text-gray-500">{t.iep}</p>
+                            <h3 className="text-lg font-bold text-gray-900 group-hover:text-purple-700 transition">{t.viewReport}</h3>
                         </div>
                     </div>
-                ))}
+                </div>
+
+                <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex items-center justify-between">
+                    <div>
+                        <p className="text-sm text-gray-500">Next Conference</p>
+                        <h3 className="text-lg font-bold text-gray-900">Nov 15, 4:00 PM</h3>
+                    </div>
+                    <button className="text-blue-600 hover:bg-blue-50 p-2 rounded-full transition">
+                        <Mail size={20} />
+                    </button>
+                </div>
+            </div>
+
+            {/* Main Chart - Full Width */}
+            <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                <div className="flex items-center justify-between mb-6">
+                    <h3 className="font-bold text-lg text-gray-800 flex items-center gap-2">
+                        <Activity size={20} className="text-orange-500"/> {t.ewis}
+                    </h3>
+                    <div className="flex bg-gray-100 rounded-lg p-1 text-xs font-bold">
+                        <button 
+                            onClick={() => setChartMode('yearly')}
+                            className={`px-3 py-1.5 rounded transition ${chartMode === 'yearly' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-500'}`}
+                        >
+                            {t.chart.yearly}
+                        </button>
+                        <button 
+                            onClick={() => setChartMode('monthly')}
+                            className={`px-3 py-1.5 rounded transition ${chartMode === 'monthly' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-500'}`}
+                        >
+                            {t.chart.monthly}
+                        </button>
+                    </div>
+                </div>
+                
+                <div className="h-72 w-full">
+                    <ResponsiveContainer width="100%" height="100%">
+                        <LineChart 
+                            data={chartMode === 'yearly' ? student.riskHistory.yearly : student.riskHistory.monthly} 
+                            margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
+                        >
+                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
+                            <XAxis dataKey="period" tick={{ fontSize: 12 }} axisLine={false} tickLine={false} dy={10} />
+                            <YAxis 
+                                domain={[0, 100]} 
+                                tick={{ fontSize: 12 }} 
+                                axisLine={false} 
+                                tickLine={false} 
+                                label={{ value: t.chart.axis, angle: -90, position: 'insideLeft', style: {fontSize: 10, fill: '#9ca3af'} }}
+                            />
+                            <Tooltip contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
+                            <Line 
+                                type="monotone" 
+                                dataKey="score" 
+                                name="Risk Score" 
+                                stroke={chartMode === 'yearly' ? '#3b82f6' : '#f59e0b'} 
+                                strokeWidth={3} 
+                                dot={{ r: 6, strokeWidth: 2, fill: '#fff' }} 
+                                activeDot={{ r: 8 }}
+                            />
+                        </LineChart>
+                    </ResponsiveContainer>
+                </div>
+                <p className="text-xs text-gray-400 mt-4 italic text-center">
+                    {t.chart.footer}
+                </p>
+            </div>
+
+            {/* Goals Row - Split 2/3 and 1/3 */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                
+                {/* Active Goals (2/3 Width) */}
+                <div className="lg:col-span-2 bg-white p-6 rounded-xl shadow-sm border border-gray-200 flex flex-col">
+                    <h3 className="font-bold text-lg text-gray-800 mb-6 flex items-center gap-2">
+                        <TrendingUp size={20} className="text-blue-600"/> {t.goals}
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 flex-1">
+                        {student.goals.map(goal => (
+                            <div key={goal.id} className="bg-gray-50 rounded-xl p-5 border border-gray-100 hover:border-blue-200 transition">
+                                <div className="flex justify-between items-start mb-2">
+                                    <span className={`text-[10px] px-2 py-1 rounded-full font-bold uppercase tracking-wide ${goal.type === 'IEP/504' ? 'bg-purple-100 text-purple-600' : 'bg-blue-100 text-blue-600'}`}>
+                                        {translateGoalText(goal.type)}
+                                    </span>
+                                    <span className="text-xs font-bold text-gray-400">{goal.progress}%</span>
+                                </div>
+                                <h4 className="font-bold text-gray-900 mb-2 text-lg leading-tight">{translateGoalText(goal.title)}</h4>
+                                <p className="text-sm text-gray-500 mb-4 line-clamp-2">{translateGoalText(goal.description)}</p>
+                                <div className="w-full bg-gray-200 rounded-full h-2">
+                                    <div className={`h-2 rounded-full ${goal.type === 'IEP/504' ? 'bg-purple-500' : 'bg-blue-600'}`} style={{width: `${goal.progress}%`}}></div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+
+                {/* Past Achievements (1/3 Width) */}
+                <div className="lg:col-span-1 bg-slate-50 p-6 rounded-xl shadow-inner border border-gray-200">
+                    <h3 className="font-bold text-lg text-slate-700 mb-6 flex items-center gap-2">
+                        <History size={20} className="text-slate-500"/> {t.historic}
+                    </h3>
+                    <div className="space-y-4">
+                        {student.historicGoals.map(goal => (
+                            <div key={goal.id} className="flex items-start gap-3 bg-white p-3 rounded-lg border border-gray-100 shadow-sm opacity-90 hover:opacity-100 transition">
+                                <div className="mt-1 text-green-500 bg-green-50 p-1 rounded-full"><CheckCircle size={14} /></div>
+                                <div>
+                                    <h4 className="font-bold text-sm text-slate-800">{translateGoalText(goal.title)}</h4>
+                                    <p className="text-xs text-slate-500 mt-0.5 mb-1">{translateGoalText(goal.description)}</p>
+                                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wide">{t.historicCompleted}: {goal.dueDate}</p>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+
             </div>
         </div>
-
       </div>
     </div>
   );
