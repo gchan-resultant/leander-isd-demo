@@ -1,4 +1,14 @@
+
 import { Student, AnalyticData } from './types';
+
+// Centralized Assets for the Project
+export const ASSETS = {
+  mathImage: "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?auto=format&fit=crop&q=80&w=600",
+  readingImage: "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&q=80&w=600",
+  docImage: "https://images.unsplash.com/photo-1455390582262-044cdead277a?auto=format&fit=crop&q=80&w=600",
+  avatarStudent: "https://api.dicebear.com/7.x/avataaars/svg?seed=Student",
+  avatarAdmin: "https://api.dicebear.com/7.x/avataaars/svg?seed=admin"
+};
 
 export const MOCK_STUDENT: Student = {
   id: 'S12345',
@@ -66,6 +76,15 @@ export const MOCK_STUDENT: Student = {
       date: '2025-09-20',
       tags: ['Reading', 'Video'],
       linkedGoalId: 'g2'
+    },
+    {
+        id: 'a3',
+        title: 'History Essay - Texas Revolution',
+        type: 'document',
+        url: '#',
+        date: '2025-09-20',
+        tags: ['History', 'Writing'],
+        linkedGoalId: undefined
     }
   ],
   riskHistory: {
