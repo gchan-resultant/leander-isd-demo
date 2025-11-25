@@ -1,19 +1,41 @@
-import React, { useState } from 'react';
+
+import React, { useState, useEffect } from 'react';
 import { CLASS_ROSTER } from '../constants';
-import { Sparkles, Search, Filter, MoreHorizontal, AlertCircle, BrainCircuit, TrendingUp, X, Clock, ArrowRight, CheckCircle } from 'lucide-react';
+import { Sparkles, Search, Filter, AlertCircle, BrainCircuit, TrendingUp, X, BookOpen, Share, Save, Send, Mail, Phone, ArrowRight, CheckCircle } from 'lucide-react';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import EdAssistAI from './EdAssistAI';
 import { Student } from '../types';
+import { GoogleGenAI } from '@google/genai';
 
 const TeacherView: React.FC = () => {
   const [isAiOpen, setIsAiOpen] = useState(false);
   const [aiPrompt, setAiPrompt] = useState<string | undefined>(undefined);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
+  
+  // Modal State
+  const [activeModalTab, setActiveModalTab] = useState<'overview' | 'trends' | 'conference'>('overview');
+  const [showPlpSuccess, setShowPlpSuccess] = useState(false);
+  const [plpFormData, setPlpFormData] = useState({ goal: '', strategy: '', resources: '' });
+
+  // Intervention State
+  const [isInterventionOpen, setIsInterventionOpen] = useState(false);
+  const [interventionStudents, setInterventionStudents] = useState<Student[]>([]);
+
+  // Auto-Summary State
+  const [summaryText, setSummaryText] = useState<string>('');
+  const [isGeneratingSummary, setIsGeneratingSummary] = useState(false);
+  const [refineInput, setRefineInput] = useState('');
 
   // Filter students
   const filteredStudents = CLASS_ROSTER.filter(s => 
     s.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  // At Risk Filter for Intervention
+  useEffect(() => {
+      setInterventionStudents(CLASS_ROSTER.filter(s => s.riskScore > 50 || s.attendance < 90));
+  }, []);
 
   // Construct context for AI
   const rosterContext = JSON.stringify(filteredStudents.map(s => ({
@@ -30,243 +52,364 @@ const TeacherView: React.FC = () => {
     setIsAiOpen(true);
   };
 
+  const handleStudentClick = (student: Student) => {
+      setSelectedStudent(student);
+      setActiveModalTab('overview'); // Reset to overview when opening
+      setShowPlpSuccess(false);
+      setSummaryText(''); // Clear previous summary
+  };
+
+  const handleCreatePLP = () => {
+      setShowPlpSuccess(true);
+      setTimeout(() => setShowPlpSuccess(false), 4000);
+      setPlpFormData({ goal: '', strategy: '', resources: '' });
+  };
+
+  // Auto-Generate Summary on Tab Load
+  useEffect(() => {
+    if (activeModalTab === 'conference' && selectedStudent && !summaryText && !isGeneratingSummary) {
+        generateActionableSummary();
+    }
+  }, [activeModalTab, selectedStudent]);
+
+  const generateActionableSummary = async (customPrompt?: string) => {
+      setIsGeneratingSummary(true);
+      
+      // Use real API if available, else mock for robustness
+      let apiKey: string | undefined;
+      try {
+        // @ts-ignore
+        if (typeof process !== 'undefined' && process.env) apiKey = process.env.API_KEY;
+      } catch (e) {}
+
+      const basePrompt = `Summarize ${selectedStudent?.name}'s reading growth and recommend 3 actionable talking points for parents based on longitudinal data. Format with **bold** points.`;
+      const promptToUse = customPrompt ? `Refine this summary: ${customPrompt}` : basePrompt;
+
+      if (apiKey) {
+          try {
+            const ai = new GoogleGenAI({ apiKey });
+            const response = await ai.models.generateContent({
+                model: 'gemini-2.5-flash',
+                contents: [{ role: 'user', parts: [{ text: `Student Data: ${JSON.stringify(selectedStudent)}. ${promptToUse}` }] }]
+            });
+            setSummaryText(response.text || "Unable to generate summary.");
+          } catch (e) {
+              console.error(e);
+              setSummaryText("Based on NWEA data, Leo has shown consistent growth in Math (+12 RIT) but stagnation in Reading. **Recommendation 1:** Discuss daily reading habits. **Recommendation 2:** Highlight his robotics success to build confidence. **Recommendation 3:** Review 504 accommodations for upcoming STAAR testing.");
+          }
+      } else {
+          // Mock Fallback
+          setTimeout(() => {
+              setSummaryText("Based on longitudinal data, Leo has shown consistent growth in Math (+12 RIT) but stagnation in Reading. \n\n**1. Reading Fluency:** Leo is averaging 130 wpm, slightly below the goal of 150. Recommend 15 mins daily practice.\n**2. Math Strength:** Leverage his interest in robotics (Math RIT 230) to encourage reading technical manuals.\n**3. Attendance:** Recent 92% attendance is an improvement but still requires monitoring.");
+          }, 1500);
+      }
+      setIsGeneratingSummary(false);
+      setRefineInput('');
+  };
+
+  // Mock Longitudinal Data
+  const longitudinalData = [
+    { grade: '1st', math: 185, reading: 182, attendance: 98 },
+    { grade: '2nd', math: 198, reading: 195, attendance: 97 },
+    { grade: '3rd', math: 212, reading: 208, attendance: 96 },
+    { grade: '4th', math: 205, reading: 210, attendance: 84 },
+    { grade: '5th', math: 218, reading: 215, attendance: 91 },
+    { grade: '6th', math: 228, reading: 222, attendance: 93 },
+  ];
+
   return (
     <div className="p-6 max-w-7xl mx-auto pb-24 relative">
-      {/* Student Detail Modal */}
-      {selectedStudent && (
+      
+      {/* Intervention Alerts Modal */}
+      {isInterventionOpen && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fadeIn">
-            <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full overflow-hidden flex flex-col max-h-[90vh]">
-                <div className="bg-gray-900 text-white p-6 flex justify-between items-start">
-                    <div>
-                        <h2 className="text-2xl font-bold">{selectedStudent.name}</h2>
-                        <p className="text-gray-400 text-sm">ID: {selectedStudent.id} • Grade {selectedStudent.grade}</p>
-                    </div>
-                    <button onClick={() => setSelectedStudent(null)} className="text-gray-400 hover:text-white"><X size={24} /></button>
+            <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full overflow-hidden">
+                <div className="bg-red-600 text-white p-4 flex justify-between items-center">
+                    <h3 className="font-bold text-lg flex items-center gap-2">
+                        <AlertCircle size={20} /> Intervention Required
+                    </h3>
+                    <button onClick={() => setIsInterventionOpen(false)} className="hover:bg-red-700 p-1 rounded transition"><X size={20} /></button>
                 </div>
-                
-                <div className="p-6 overflow-y-auto">
-                    {/* Quick Stats */}
-                    <div className="grid grid-cols-3 gap-4 mb-8">
-                        <div className="bg-blue-50 p-4 rounded-lg text-center">
-                            <div className="text-xs text-blue-600 font-bold uppercase tracking-wider mb-1">Attendance</div>
-                            <div className="text-2xl font-bold text-blue-900">{selectedStudent.attendance}%</div>
-                            <div className="text-[10px] text-gray-500">Last Year: 88%</div>
-                        </div>
-                        <div className="bg-green-50 p-4 rounded-lg text-center">
-                            <div className="text-xs text-green-600 font-bold uppercase tracking-wider mb-1">GPA</div>
-                            <div className="text-2xl font-bold text-green-900">{selectedStudent.gpa}</div>
-                            <div className="text-[10px] text-gray-500">Last Year: 3.1</div>
-                        </div>
-                        <div className="bg-orange-50 p-4 rounded-lg text-center">
-                            <div className="text-xs text-orange-600 font-bold uppercase tracking-wider mb-1">Risk Score</div>
-                            <div className="text-2xl font-bold text-orange-900">{selectedStudent.riskScore}</div>
-                            <div className="text-[10px] text-gray-500">Last Year: 42</div>
-                        </div>
-                    </div>
-
-                    {/* Longitudinal Data */}
-                    <h3 className="font-bold text-gray-800 mb-4 flex items-center gap-2">
-                        <Clock size={18} className="text-blue-600" /> Multi-Year Assessment Trends
-                    </h3>
-                    <div className="bg-white border border-gray-200 rounded-lg overflow-hidden mb-8">
-                        <table className="w-full text-sm text-left">
-                            <thead className="bg-gray-50 text-gray-500 font-medium">
-                                <tr>
-                                    <th className="p-3">Assessment</th>
-                                    <th className="p-3">2023 (Prior)</th>
-                                    <th className="p-3">2024 (Current)</th>
-                                    <th className="p-3">Growth</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-gray-100">
-                                <tr>
-                                    <td className="p-3 font-medium text-gray-900">NWEA Math</td>
-                                    <td className="p-3 text-gray-500">225</td>
-                                    <td className="p-3 font-bold text-gray-900">238</td>
-                                    <td className="p-3 text-green-600 font-bold">+13</td>
-                                </tr>
-                                <tr>
-                                    <td className="p-3 font-medium text-gray-900">NWEA Reading</td>
-                                    <td className="p-3 text-gray-500">218</td>
-                                    <td className="p-3 font-bold text-gray-900">222</td>
-                                    <td className="p-3 text-yellow-600 font-bold">+4</td>
-                                </tr>
-                                <tr>
-                                    <td className="p-3 font-medium text-gray-900">State Test (Algebra)</td>
-                                    <td className="p-3 text-gray-500">Approaches</td>
-                                    <td className="p-3 font-bold text-gray-900">Meets</td>
-                                    <td className="p-3 text-green-600 font-bold"><ArrowRight size={16} /></td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-
-                    {/* Interventions */}
-                    <h3 className="font-bold text-gray-800 mb-4 flex items-center gap-2">
-                        <AlertCircle size={18} className="text-purple-600" /> Active Interventions & Goals
-                    </h3>
+                <div className="p-6 bg-gray-50">
+                    <p className="text-sm text-gray-600 mb-4">The following students have triggered Early Warning Indicators (Attendance {'<'} 90% or Risk Score {'>'} 50) this week.</p>
                     <div className="space-y-3">
-                        {selectedStudent.goals.map((g, i) => (
-                            <div key={i} className="bg-gray-50 p-3 rounded-lg border border-gray-200 flex justify-between items-center">
+                        {interventionStudents.map(s => (
+                            <div key={s.id} className="bg-white p-4 rounded-lg border-l-4 border-red-500 shadow-sm flex justify-between items-center">
                                 <div>
-                                    <div className="font-semibold text-sm text-gray-800">{g.title}</div>
-                                    <div className="text-xs text-gray-500">{g.type} • Due {g.dueDate}</div>
+                                    <h4 className="font-bold text-gray-900">{s.name}</h4>
+                                    <div className="text-xs text-red-600 font-semibold mt-1">
+                                        Risk Score: {s.riskScore} • Attendance: {s.attendance}%
+                                    </div>
                                 </div>
-                                <span className="text-sm font-bold text-blue-600">{g.progress}%</span>
+                                <div className="flex gap-2">
+                                    <button className="p-2 text-gray-500 hover:bg-gray-100 rounded-full" title="Email Parent"><Mail size={18}/></button>
+                                    <button className="p-2 text-gray-500 hover:bg-gray-100 rounded-full" title="Call Home"><Phone size={18}/></button>
+                                    <button className="px-3 py-1.5 bg-red-50 text-red-700 text-xs font-bold rounded border border-red-200 hover:bg-red-100 transition">
+                                        Log Contact
+                                    </button>
+                                </div>
                             </div>
                         ))}
-                        {selectedStudent.iepStatus && (
-                            <div className="bg-purple-50 p-3 rounded-lg border border-purple-100 flex items-center gap-2 text-sm text-purple-800">
-                                <CheckCircle size={16} />
-                                <span>Student has active 504 Plan accommodations.</span>
-                            </div>
-                        )}
                     </div>
-                </div>
-                
-                <div className="bg-gray-50 p-4 border-t border-gray-200 flex justify-end gap-3">
-                    <button onClick={() => setSelectedStudent(null)} className="px-4 py-2 text-gray-600 hover:bg-gray-200 rounded-lg transition">Close</button>
-                    <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition shadow-sm">Start Conference Mode</button>
                 </div>
             </div>
         </div>
       )}
 
-      {/* EdAssist AI Modal */}
-      <EdAssistAI 
-        isOpen={isAiOpen} 
-        onClose={() => setIsAiOpen(false)} 
-        contextData={rosterContext}
-        initialPrompt={aiPrompt}
-      />
+      {/* Student Detail Modal */}
+      {selectedStudent && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fadeIn">
+            <div className="bg-white rounded-xl shadow-2xl max-w-4xl w-full overflow-hidden flex flex-col max-h-[90vh]">
+                <div className="bg-gray-900 text-white p-6 flex justify-between items-start">
+                    <div>
+                        <div className="flex items-center gap-3 mb-1">
+                            <h2 className="text-2xl font-bold">{selectedStudent.name}</h2>
+                            {selectedStudent.iepStatus && (
+                                <span className="bg-purple-600 text-white text-xs px-2 py-0.5 rounded font-bold uppercase">IEP/504</span>
+                            )}
+                        </div>
+                        <p className="text-gray-400 text-sm">ID: {selectedStudent.id} • Grade {selectedStudent.grade} • {selectedStudent.name.split(' ')[0]}'s Backpack</p>
+                    </div>
+                    <button onClick={() => setSelectedStudent(null)} className="text-gray-400 hover:text-white transition"><X size={24} /></button>
+                </div>
+                
+                <div className="flex border-b border-gray-200 bg-gray-50 px-6">
+                    {['overview', 'trends', 'conference'].map((tab) => (
+                        <button 
+                            key={tab}
+                            onClick={() => setActiveModalTab(tab as any)}
+                            className={`px-6 py-4 font-medium text-sm border-b-2 transition-colors capitalize ${activeModalTab === tab ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
+                        >
+                            {tab === 'conference' ? 'Conference Prep' : tab === 'trends' ? 'Trends & Patterns' : tab}
+                        </button>
+                    ))}
+                </div>
+                
+                <div className="p-6 overflow-y-auto bg-white flex-1">
+                    {activeModalTab === 'overview' && (
+                        <div className="space-y-6 animate-fadeIn">
+                            <div className="grid grid-cols-3 gap-4">
+                                <div className="bg-blue-50 p-4 rounded-xl border border-blue-100 text-center">
+                                    <div className="text-xs text-blue-600 font-bold uppercase tracking-wider mb-1">Attendance</div>
+                                    <div className="text-3xl font-bold text-blue-900">{selectedStudent.attendance}%</div>
+                                </div>
+                                <div className="bg-green-50 p-4 rounded-xl border border-green-100 text-center">
+                                    <div className="text-xs text-green-600 font-bold uppercase tracking-wider mb-1">GPA</div>
+                                    <div className="text-3xl font-bold text-green-900">{selectedStudent.gpa}</div>
+                                </div>
+                                <div className="bg-orange-50 p-4 rounded-xl border border-orange-100 text-center">
+                                    <div className="text-xs text-orange-600 font-bold uppercase tracking-wider mb-1">Risk Score</div>
+                                    <div className="text-3xl font-bold text-orange-900">{selectedStudent.riskScore}</div>
+                                </div>
+                            </div>
+                            <div>
+                                <h3 className="font-bold text-gray-800 mb-3 flex items-center gap-2">
+                                    <AlertCircle size={18} className="text-blue-600" /> Active Goals
+                                </h3>
+                                <div className="space-y-3">
+                                    {selectedStudent.goals.map((g, i) => (
+                                        <div key={i} className="bg-white border border-gray-200 p-4 rounded-lg shadow-sm flex justify-between items-center">
+                                            <div>
+                                                <div className="font-bold text-gray-800">{g.title}</div>
+                                                <div className="text-xs text-gray-500 mt-0.5">{g.type} • Due {g.dueDate}</div>
+                                            </div>
+                                            <div className="w-16 h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                                                <div className="h-full bg-blue-600 rounded-full" style={{width: `${g.progress}%`}}></div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                    )}
 
-      {/* Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+                    {activeModalTab === 'trends' && (
+                        <div className="space-y-6 animate-fadeIn">
+                            <div className="flex items-start gap-4 bg-blue-50 p-4 rounded-xl border border-blue-100">
+                                <div className="bg-white p-2 rounded-lg shadow-sm text-blue-600"><BrainCircuit size={24} /></div>
+                                <div>
+                                    <h4 className="font-bold text-blue-900 text-sm">Explainable AI Insight</h4>
+                                    <p className="text-sm text-blue-800 mt-1 leading-relaxed">
+                                        Vertex AI analysis identifies a correlation: The <strong>dip in 4th Grade Math scores</strong> correlates with a <strong>15% drop in attendance</strong> during that same academic year.
+                                    </p>
+                                </div>
+                            </div>
+                            <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm h-64">
+                                <ResponsiveContainer width="100%" height="100%">
+                                    <LineChart data={longitudinalData}>
+                                        <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                                        <XAxis dataKey="grade" />
+                                        <YAxis domain={[150, 250]} />
+                                        <Tooltip />
+                                        <Legend />
+                                        <Line type="monotone" dataKey="math" name="Math RIT" stroke="#3b82f6" strokeWidth={3} />
+                                        <Line type="monotone" dataKey="reading" name="Reading RIT" stroke="#10b981" strokeWidth={3} />
+                                    </LineChart>
+                                </ResponsiveContainer>
+                            </div>
+                        </div>
+                    )}
+
+                    {activeModalTab === 'conference' && (
+                        <div className="space-y-8 animate-fadeIn">
+                            <div className="bg-indigo-50 rounded-xl p-6 border border-indigo-100">
+                                <div className="flex justify-between items-start mb-4">
+                                    <div>
+                                        <h3 className="font-bold text-indigo-900 flex items-center gap-2">
+                                            <Sparkles size={18} /> Actionable Summary
+                                        </h3>
+                                        <p className="text-sm text-indigo-700 mt-1">Auto-generated by EdAssist based on longitudinal data.</p>
+                                    </div>
+                                </div>
+                                
+                                <div className="bg-white rounded-lg p-5 border border-indigo-100 shadow-sm min-h-[120px] text-sm text-gray-800 leading-relaxed">
+                                    {isGeneratingSummary ? (
+                                        <div className="flex items-center gap-2 text-indigo-400">
+                                            <span className="animate-spin">✨</span> Analyzing data patterns...
+                                        </div>
+                                    ) : (
+                                        <div dangerouslySetInnerHTML={{ __html: summaryText.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br/>') }}></div>
+                                    )}
+                                </div>
+
+                                {/* Refinement Chat */}
+                                <div className="mt-4 flex gap-2">
+                                    <input 
+                                        type="text" 
+                                        value={refineInput}
+                                        onChange={(e) => setRefineInput(e.target.value)}
+                                        onKeyDown={(e) => e.key === 'Enter' && generateActionableSummary(refineInput)}
+                                        placeholder="Refine this summary (e.g., 'Translate to Spanish', 'Make it simpler')..."
+                                        className="flex-1 border border-indigo-200 rounded-lg px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-indigo-500"
+                                    />
+                                    <button 
+                                        onClick={() => generateActionableSummary(refineInput)}
+                                        disabled={isGeneratingSummary}
+                                        className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition"
+                                    >
+                                        <Send size={16} />
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div className="border-t border-gray-100 pt-6">
+                                <h3 className="font-bold text-gray-900 mb-4 flex items-center gap-2"><Share size={18} className="text-blue-600" /> Post-Conference Action</h3>
+                                <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm space-y-4">
+                                    <div>
+                                        <label className="text-xs font-semibold text-gray-700">New Intervention Goal</label>
+                                        <input 
+                                            type="text" 
+                                            value={plpFormData.goal}
+                                            onChange={(e) => setPlpFormData({...plpFormData, goal: e.target.value})}
+                                            placeholder="e.g. Increase Reading Fluency to 140wpm" 
+                                            className="w-full border border-gray-300 rounded-lg p-2 text-sm mt-1" 
+                                        />
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <label className="text-xs font-semibold text-gray-700">Instructional Strategy</label>
+                                            <select 
+                                                value={plpFormData.strategy}
+                                                onChange={(e) => setPlpFormData({...plpFormData, strategy: e.target.value})}
+                                                className="w-full border border-gray-300 rounded-lg p-2 text-sm mt-1"
+                                            >
+                                                <option value="">Select Strategy...</option>
+                                                <option value="Small Group">Small Group Instruction</option>
+                                                <option value="Peer Tutoring">Peer Tutoring</option>
+                                                <option value="Visual Aids">Visual Aids</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label className="text-xs font-semibold text-gray-700">Resources</label>
+                                            <input 
+                                                type="text" 
+                                                value={plpFormData.resources}
+                                                onChange={(e) => setPlpFormData({...plpFormData, resources: e.target.value})}
+                                                placeholder="Assigned materials..." 
+                                                className="w-full border border-gray-300 rounded-lg p-2 text-sm mt-1" 
+                                            />
+                                        </div>
+                                    </div>
+                                    <div className="flex justify-end pt-2">
+                                        <button onClick={handleCreatePLP} className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-lg font-bold text-sm shadow-md flex items-center gap-2">
+                                            <Save size={16} /> Save & Assign
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            </div>
+            {showPlpSuccess && (
+                <div className="fixed bottom-8 left-1/2 transform -translate-x-1/2 bg-gray-900 text-white px-6 py-3 rounded-full shadow-2xl flex items-center gap-3 animate-bounce-in z-[60]">
+                    <CheckCircle size={16} className="text-green-400" />
+                    <span className="font-medium">PLP Created & Resources Assigned!</span>
+                </div>
+            )}
+        </div>
+      )}
+
+      {/* EdAssist AI Sidebar */}
+      <EdAssistAI isOpen={isAiOpen} onClose={() => setIsAiOpen(false)} contextData={rosterContext} initialPrompt={aiPrompt} />
+
+      <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
         <div>
             <h1 className="text-3xl font-bold text-gray-900">Classroom Overview</h1>
             <p className="text-gray-500">Period 2: Algebra I</p>
         </div>
         <div className="flex gap-3">
-            <button className="px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 font-medium transition flex items-center gap-2">
-                <Filter size={18} /> Filter
-            </button>
-            <button 
-                onClick={() => launchAi()}
-                className="px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg font-medium shadow-md hover:shadow-lg transition flex items-center gap-2 animate-pulse-slow"
-            >
+            <button onClick={() => launchAi()} className="px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg font-medium shadow-md flex items-center gap-2">
                 <Sparkles size={18} /> Launch EdAssist AI
             </button>
         </div>
       </div>
 
-      {/* Search */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-6">
         <div className="p-4 border-b border-gray-100 bg-gray-50/50 flex items-center gap-3">
             <Search className="text-gray-400" size={20} />
-            <input 
-                type="text" 
-                placeholder="Search student name..." 
-                className="bg-transparent outline-none flex-1 text-sm"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-            />
+            <input type="text" placeholder="Search student..." className="bg-transparent outline-none flex-1 text-sm" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
         </div>
-        
-        {/* Roster Table */}
-        <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
-                <thead>
-                    <tr className="text-xs text-gray-500 border-b border-gray-100">
-                        <th className="p-4 font-medium">Student Name</th>
-                        <th className="p-4 font-medium">Status</th>
-                        <th className="p-4 font-medium">Attendance</th>
-                        <th className="p-4 font-medium">Current GPA</th>
-                        <th className="p-4 font-medium">EWIS Risk Score</th>
-                        <th className="p-4 font-medium text-right">Actions</th>
+        <table className="w-full text-left border-collapse">
+            <thead className="text-xs text-gray-500 border-b border-gray-100">
+                <tr>
+                    <th className="p-4">Name</th>
+                    <th className="p-4">Status</th>
+                    <th className="p-4">Risk Score</th>
+                    <th className="p-4 text-right">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {filteredStudents.map(s => (
+                    <tr key={s.id} onClick={() => handleStudentClick(s)} className="hover:bg-blue-50 cursor-pointer border-b border-gray-50 last:border-0">
+                        <td className="p-4 font-medium">{s.name}</td>
+                        <td className="p-4">{s.iepStatus && <span className="px-2 py-1 bg-purple-100 text-purple-700 text-xs rounded font-medium">IEP</span>}</td>
+                        <td className="p-4"><div className={`text-xs font-bold ${s.riskScore > 50 ? 'text-red-600' : 'text-green-600'}`}>{s.riskScore}</div></td>
+                        <td className="p-4 text-right"><ArrowRight size={16} className="text-gray-400"/></td>
                     </tr>
-                </thead>
-                <tbody>
-                    {filteredStudents.map(student => (
-                        <tr 
-                            key={student.id} 
-                            onClick={() => setSelectedStudent(student)}
-                            className="hover:bg-gray-50 transition border-b border-gray-50 last:border-0 cursor-pointer group"
-                        >
-                            <td className="p-4">
-                                <div className="font-medium text-gray-900 group-hover:text-blue-600 transition-colors">{student.name}</div>
-                                <div className="text-xs text-gray-400">ID: {student.id}</div>
-                            </td>
-                            <td className="p-4">
-                                <div className="flex gap-2">
-                                    {student.iepStatus && (
-                                        <span className="px-2 py-1 bg-purple-100 text-purple-700 text-xs rounded font-medium">IEP/504</span>
-                                    )}
-                                </div>
-                            </td>
-                            <td className="p-4 text-sm text-gray-600">{student.attendance}%</td>
-                            <td className="p-4 text-sm text-gray-600">{student.gpa}</td>
-                            <td className="p-4">
-                                <div className="flex items-center gap-2">
-                                    <div className="w-24 bg-gray-200 rounded-full h-2">
-                                        <div 
-                                            className={`h-2 rounded-full ${
-                                                student.riskScore < 30 ? 'bg-green-500' : 
-                                                student.riskScore < 60 ? 'bg-yellow-500' : 'bg-red-500'
-                                            }`} 
-                                            style={{width: `${student.riskScore}%`}}
-                                        />
-                                    </div>
-                                    <span className={`text-xs font-bold ${
-                                         student.riskScore < 30 ? 'text-green-600' : 
-                                         student.riskScore < 60 ? 'text-yellow-600' : 'text-red-600'
-                                    }`}>{student.riskScore}</span>
-                                </div>
-                            </td>
-                            <td className="p-4 text-right">
-                                <button className="p-2 hover:bg-gray-200 rounded-full text-gray-400 hover:text-gray-600">
-                                    <MoreHorizontal size={18} />
-                                </button>
-                            </td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
-        </div>
+                ))}
+            </tbody>
+        </table>
       </div>
 
-      {/* Quick Actions Grid - AI DEMO TRIGGERS */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* Differentiation Use Case */}
-        <div 
-            onClick={() => launchAi("Based on the roster data, suggest 3 small groups for differentiation in tomorrow's math lesson. Consider risk scores and attendance.")}
-            className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition cursor-pointer group"
-        >
-            <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center text-blue-600 mb-3 group-hover:bg-blue-600 group-hover:text-white transition">
-                <BrainCircuit size={20} />
-            </div>
+        <div onClick={() => launchAi("Group these students for math intervention based on risk scores.")} className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition cursor-pointer group">
+            <div className="w-10 h-10 bg-blue-100 text-blue-600 rounded-lg flex items-center justify-center mb-3"><BrainCircuit size={20}/></div>
             <h3 className="font-bold text-gray-800">Group Students</h3>
-            <p className="text-sm text-gray-500 mt-1">Use AI to create differentiation groups based on recent performance.</p>
+            <p className="text-xs text-gray-500 mt-1">AI-generated differentiation groups.</p>
+        </div>
+        
+        {/* Analyze Trends Tile - Restored */}
+        <div onClick={() => launchAi("Analyze the correlation between attendance and math performance for this class.")} className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition cursor-pointer group">
+            <div className="w-10 h-10 bg-purple-100 text-purple-600 rounded-lg flex items-center justify-center mb-3"><TrendingUp size={20}/></div>
+            <h3 className="font-bold text-gray-800">Analyze Trends</h3>
+            <p className="text-xs text-gray-500 mt-1">Ask AI to find correlations.</p>
         </div>
 
-        {/* Connecting Data Points Use Case */}
-        <div 
-            onClick={() => launchAi("Analyze the correlation between attendance and risk scores for my students. Are there any students who need immediate intervention due to both factors?")}
-            className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition cursor-pointer group"
-        >
-            <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center text-green-600 mb-3 group-hover:bg-green-600 group-hover:text-white transition">
-                <TrendingUp size={20} />
-            </div>
-            <h3 className="font-bold text-gray-800">Attendance vs. Achievement</h3>
-            <p className="text-sm text-gray-500 mt-1">Identify students where attendance is impacting academic growth.</p>
-        </div>
-
-        {/* Intervention Use Case */}
-        <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition cursor-pointer group">
-            <div className="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center text-red-600 mb-3 group-hover:bg-red-600 group-hover:text-white transition">
-                <AlertCircle size={20} />
-            </div>
+        <div onClick={() => setIsInterventionOpen(true)} className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition cursor-pointer group">
+            <div className="w-10 h-10 bg-red-100 text-red-600 rounded-lg flex items-center justify-center mb-3"><AlertCircle size={20}/></div>
             <h3 className="font-bold text-gray-800">Intervention Alerts</h3>
-            <p className="text-sm text-gray-500 mt-1">3 students have missed 2+ days this week. View contact logs.</p>
+            <p className="text-xs text-gray-500 mt-1">{interventionStudents.length} students need attention.</p>
         </div>
       </div>
     </div>
