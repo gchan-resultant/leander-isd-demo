@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { UserRole } from './types';
 import RoleSwitcher from './components/RoleSwitcher';
@@ -6,6 +7,7 @@ import ParentView from './components/ParentView';
 import TeacherView from './components/TeacherView';
 import AdminView from './components/AdminView';
 import BoardView from './components/BoardView';
+import CampusView from './components/CampusView'; // New Import
 import PilotView from './components/PilotView';
 import DemoGuide from './components/DemoGuide';
 import { LayoutDashboard, ChevronDown, Check, Rocket, Presentation } from 'lucide-react';
@@ -32,6 +34,7 @@ const App: React.FC = () => {
       case UserRole.TEACHER:
         return <TeacherView />;
       case UserRole.PRINCIPAL:
+        return <CampusView />; // Route Principal to Campus View
       case UserRole.ADMIN:
         return <AdminView />;
       case UserRole.BOARD:
@@ -112,21 +115,6 @@ const App: React.FC = () => {
 
           {/* Right Side User Info & Demo Toggle */}
           <div className="flex items-center space-x-4">
-             {/* Presenter Mode Toggle - HIDDEN FOR NOW
-             <button
-                onClick={() => setShowDemoGuide(!showDemoGuide)}
-                className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold transition ${
-                    showDemoGuide 
-                    ? 'bg-slate-800 text-yellow-400 ring-2 ring-yellow-400/50' 
-                    : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
-                }`}
-                title="Toggle Presenter Script & Strategy"
-             >
-                <Presentation size={14} />
-                <span>{showDemoGuide ? 'Presenter Mode: ON' : 'Presenter Mode'}</span>
-             </button>
-             */}
-
             <div className="hidden md:flex flex-col items-end border-l border-gray-200 pl-4">
                {appVersion === 'future' ? (
                    <>

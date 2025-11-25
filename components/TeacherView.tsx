@@ -118,7 +118,7 @@ const TeacherView: React.FC = () => {
   ];
 
   return (
-    <div className="p-6 max-w-7xl mx-auto pb-24 relative">
+    <div className="relative overflow-x-hidden min-h-screen bg-gray-50">
       
       {/* Intervention Alerts Modal */}
       {isInterventionOpen && (
@@ -230,7 +230,7 @@ const TeacherView: React.FC = () => {
                                 <div>
                                     <h4 className="font-bold text-blue-900 text-sm">Explainable AI Insight</h4>
                                     <p className="text-sm text-blue-800 mt-1 leading-relaxed">
-                                        Vertex AI analysis identifies a correlation: The <strong>dip in 4th Grade Math scores</strong> correlates with a <strong>15% drop in attendance</strong> during that same academic year.
+                                        EdAssist AI analysis identifies a correlation: The <strong>dip in 4th Grade Math scores</strong> correlates with a <strong>15% drop in attendance</strong> during that same academic year.
                                     </p>
                                 </div>
                             </div>
@@ -353,63 +353,83 @@ const TeacherView: React.FC = () => {
       {/* EdAssist AI Sidebar */}
       <EdAssistAI isOpen={isAiOpen} onClose={() => setIsAiOpen(false)} contextData={rosterContext} initialPrompt={aiPrompt} />
 
-      <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
-        <div>
-            <h1 className="text-3xl font-bold text-gray-900">Classroom Overview</h1>
-            <p className="text-gray-500">Period 2: Algebra I</p>
-        </div>
-        <div className="flex gap-3">
-            <button onClick={() => launchAi()} className="px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg font-medium shadow-md flex items-center gap-2">
-                <Sparkles size={18} /> Launch EdAssist AI
-            </button>
-        </div>
-      </div>
+      <div className={`transition-all duration-300 ease-in-out ${isAiOpen ? 'mr-0 md:mr-[450px]' : ''}`}>
+        <div className="p-6 max-w-7xl mx-auto pb-24">
+            {/* Top Branding & Navigation Row - Added per instructions */}
+            <div className="flex justify-between items-center mb-6">
+                <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center shadow-sm text-xl text-white">
+                        🦁
+                    </div>
+                    <span className="font-bold text-blue-900 text-lg bg-white px-4 py-1.5 rounded-full shadow-sm border border-blue-100">Rouse High School</span>
+                </div>
+            </div>
 
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-6">
-        <div className="p-4 border-b border-gray-100 bg-gray-50/50 flex items-center gap-3">
-            <Search className="text-gray-400" size={20} />
-            <input type="text" placeholder="Search student..." className="bg-transparent outline-none flex-1 text-sm" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
-        </div>
-        <table className="w-full text-left border-collapse">
-            <thead className="text-xs text-gray-500 border-b border-gray-100">
-                <tr>
-                    <th className="p-4">Name</th>
-                    <th className="p-4">Status</th>
-                    <th className="p-4">Risk Score</th>
-                    <th className="p-4 text-right">Action</th>
-                </tr>
-            </thead>
-            <tbody>
-                {filteredStudents.map(s => (
-                    <tr key={s.id} onClick={() => handleStudentClick(s)} className="hover:bg-blue-50 cursor-pointer border-b border-gray-50 last:border-0">
-                        <td className="p-4 font-medium">{s.name}</td>
-                        <td className="p-4">{s.iepStatus && <span className="px-2 py-1 bg-purple-100 text-purple-700 text-xs rounded font-medium">IEP</span>}</td>
-                        <td className="p-4"><div className={`text-xs font-bold ${s.riskScore > 50 ? 'text-red-600' : 'text-green-600'}`}>{s.riskScore}</div></td>
-                        <td className="p-4 text-right"><ArrowRight size={16} className="text-gray-400"/></td>
-                    </tr>
-                ))}
-            </tbody>
-        </table>
-      </div>
+            <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
+                <div>
+                    <div className="flex items-center gap-3 mb-1">
+                        <h1 className="text-3xl font-bold text-gray-900">Classroom Overview</h1>
+                    </div>
+                    <p className="text-gray-500">Period 2: Algebra I</p>
+                </div>
+                <div className="flex gap-3">
+                    <button onClick={() => launchAi()} className="px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg font-medium shadow-md flex items-center gap-2 hover:shadow-lg transition hover:brightness-110">
+                        <Sparkles size={18} /> Launch EdAssist AI
+                    </button>
+                </div>
+            </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div onClick={() => launchAi("Group these students for math intervention based on risk scores.")} className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition cursor-pointer group">
-            <div className="w-10 h-10 bg-blue-100 text-blue-600 rounded-lg flex items-center justify-center mb-3"><BrainCircuit size={20}/></div>
-            <h3 className="font-bold text-gray-800">Group Students</h3>
-            <p className="text-xs text-gray-500 mt-1">AI-generated differentiation groups.</p>
-        </div>
-        
-        {/* Analyze Trends Tile - Restored */}
-        <div onClick={() => launchAi("Analyze the correlation between attendance and math performance for this class.")} className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition cursor-pointer group">
-            <div className="w-10 h-10 bg-purple-100 text-purple-600 rounded-lg flex items-center justify-center mb-3"><TrendingUp size={20}/></div>
-            <h3 className="font-bold text-gray-800">Analyze Trends</h3>
-            <p className="text-xs text-gray-500 mt-1">Ask AI to find correlations.</p>
-        </div>
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-6">
+                <div className="p-4 border-b border-gray-100 bg-gray-50/50 flex items-center gap-3">
+                    <Search className="text-gray-400" size={20} />
+                    <input type="text" placeholder="Search student..." className="bg-transparent outline-none flex-1 text-sm" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+                </div>
+                <table className="w-full text-left border-collapse">
+                    <thead className="text-xs text-gray-500 border-b border-gray-100">
+                        <tr>
+                            <th className="p-4">Name</th>
+                            <th className="p-4">Status</th>
+                            <th className="p-4">Risk Score</th>
+                            <th className="p-4 text-center">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {filteredStudents.map(s => (
+                            <tr key={s.id} onClick={() => handleStudentClick(s)} className="hover:bg-blue-50 cursor-pointer border-b border-gray-50 last:border-0">
+                                <td className="p-4 font-medium">{s.name}</td>
+                                <td className="p-4">{s.iepStatus && <span className="px-2 py-1 bg-purple-100 text-purple-700 text-xs rounded font-medium">IEP</span>}</td>
+                                <td className="p-4"><div className={`text-xs font-bold ${s.riskScore > 50 ? 'text-red-600' : 'text-green-600'}`}>{s.riskScore}</div></td>
+                                <td className="p-4 text-center">
+                                    <div className="flex justify-center items-center">
+                                        <ArrowRight size={16} className="text-gray-400"/>
+                                    </div>
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
 
-        <div onClick={() => setIsInterventionOpen(true)} className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition cursor-pointer group">
-            <div className="w-10 h-10 bg-red-100 text-red-600 rounded-lg flex items-center justify-center mb-3"><AlertCircle size={20}/></div>
-            <h3 className="font-bold text-gray-800">Intervention Alerts</h3>
-            <p className="text-xs text-gray-500 mt-1">{interventionStudents.length} students need attention.</p>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div onClick={() => launchAi("Group these students for math intervention based on risk scores.")} className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition cursor-pointer group">
+                    <div className="w-10 h-10 bg-blue-100 text-blue-600 rounded-lg flex items-center justify-center mb-3"><BrainCircuit size={20}/></div>
+                    <h3 className="font-bold text-gray-800">Group Students</h3>
+                    <p className="text-xs text-gray-500 mt-1">AI-generated differentiation groups.</p>
+                </div>
+                
+                {/* Analyze Trends Tile - Restored */}
+                <div onClick={() => launchAi("Analyze the correlation between attendance and math performance for this class.")} className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition cursor-pointer group">
+                    <div className="w-10 h-10 bg-purple-100 text-purple-600 rounded-lg flex items-center justify-center mb-3"><TrendingUp size={20}/></div>
+                    <h3 className="font-bold text-gray-800">Analyze Trends</h3>
+                    <p className="text-xs text-gray-500 mt-1">Ask AI to find correlations.</p>
+                </div>
+
+                <div onClick={() => setIsInterventionOpen(true)} className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition cursor-pointer group">
+                    <div className="w-10 h-10 bg-red-100 text-red-600 rounded-lg flex items-center justify-center mb-3"><AlertCircle size={20}/></div>
+                    <h3 className="font-bold text-gray-800">Intervention Alerts</h3>
+                    <p className="text-xs text-gray-500 mt-1">{interventionStudents.length} students need attention.</p>
+                </div>
+            </div>
         </div>
       </div>
     </div>
