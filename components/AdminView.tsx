@@ -43,7 +43,7 @@ const AdminView: React.FC = () => {
     <div className="min-h-screen bg-gray-50 font-sans pb-24 relative overflow-x-hidden">
       
       {/* EdAssist AI Sidebar */}
-      <EdAssistAI isOpen={isAiOpen} onClose={() => setIsAiOpen(false)} contextData={districtContext} initialPrompt={aiPrompt} />
+      <EdAssistAI isOpen={isAiOpen} onClose={() => setIsAiOpen(false)} contextData={districtContext} initialPrompt={aiPrompt} role="District Administrator" />
 
       <div className={`transition-all duration-300 ease-in-out ${isAiOpen ? 'mr-0 md:mr-[450px]' : ''}`}>
         {/* White Header (Matching Teacher View) */}
@@ -62,9 +62,7 @@ const AdminView: React.FC = () => {
                     <div className="text-xs font-bold text-gray-400 uppercase tracking-wider">Current View</div>
                     <div className="text-sm font-bold text-gray-700">District Administrator</div>
                 </div>
-                <button onClick={() => setIsAiOpen(true)} className="px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg font-medium shadow-md flex items-center gap-2 transition hover:shadow-lg hover:brightness-110">
-                    <Sparkles size={18} /> Launch EdAssist AI
-                </button>
+                {/* Removed top-right button as requested */}
             </div>
         </div>
 
@@ -77,8 +75,11 @@ const AdminView: React.FC = () => {
                         <p className="text-slate-300 text-lg mb-6 leading-relaxed">
                             A comprehensive view of district-wide technology adoption, LMS usage stats, and student connectivity metrics across all 45 campuses.
                         </p>
-                        <button className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-bold transition shadow-lg">
-                            Explore Dashboard
+                        <button 
+                            onClick={() => setIsAiOpen(true)} 
+                            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-bold transition shadow-lg flex items-center gap-2"
+                        >
+                            <Sparkles size={18} /> Launch EdAssist AI
                         </button>
                     </div>
                     {/* Abstract Hexagon Graphic */}

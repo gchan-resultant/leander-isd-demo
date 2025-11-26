@@ -9,15 +9,37 @@ interface EdAssistAIProps {
   isOpen: boolean;
   onClose: () => void;
   initialPrompt?: string;
+  role?: string;
 }
 
-const EdAssistAI: React.FC<EdAssistAIProps> = ({ contextData, isOpen, onClose, initialPrompt }) => {
+const EdAssistAI: React.FC<EdAssistAIProps> = ({ contextData, isOpen, onClose, initialPrompt, role }) => {
   const [input, setInput] = useState('');
-  const [messages, setMessages] = useState<{ role: 'user' | 'model'; text: string }[]>([
-    { role: 'model', text: "Hello! I'm EdAssist, your instructional co-pilot. I have access to the current student data. How can I help you differentiate instruction or analyze trends today?" }
-  ]);
+  const [messages, setMessages] = useState<{ role: 'user' | 'model'; text: string }[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Generate Persona-Aware Greeting
+  useEffect(() => {
+    if (messages.length === 0) {
+        let greeting = "Hello! I'm EdAssist, your virtual assistant. I have access to the current student data. How can I help you today?";
+        
+        switch(role) {
+            case 'Teacher':
+                greeting = "Hello! I'm EdAssist, your instructional virtual assistant. I have access to your classroom data. How can I help you differentiate instruction or analyze trends today?";
+                break;
+            case 'Principal':
+                greeting = "Hello! I'm EdAssist, your campus virtual assistant. I have access to Rouse High School's performance metrics. Ready to analyze cohort growth or identify instructional support needs?";
+                break;
+            case 'District Administrator':
+                greeting = "Hello! I'm EdAssist, your district virtual assistant. I have access to district-wide enrollment, finance, and assessment data. How can I assist with strategic planning or compliance?";
+                break;
+            case 'Parent':
+                greeting = "Hello! I'm EdAssist, your family virtual assistant. I'm here to help you understand your child's progress, goals, and report cards. What questions do you have?";
+                break;
+        }
+        setMessages([{ role: 'model', text: greeting }]);
+    }
+  }, [role]);
 
   // Handle initial prompt trigger for demos
   useEffect(() => {
@@ -59,7 +81,8 @@ const EdAssistAI: React.FC<EdAssistAIProps> = ({ contextData, isOpen, onClose, i
       const ai = new GoogleGenAI({ apiKey });
       
       const systemInstruction = `You are EdAssist, an AI assistant for Leander ISD. 
-      You have access to real-time district and campus data.
+      Your persona is a helpful virtual assistant for a ${role || 'user'}.
+      You have access to real-time data.
       
       Context Data: ${contextData}
       

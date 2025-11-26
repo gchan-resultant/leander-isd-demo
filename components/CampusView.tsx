@@ -33,6 +33,16 @@ const TEACHER_PULSE_DATA = [
     { id: 't5', name: 'Mrs. Wilson', dept: 'Art', students: 125, failureRate: 0.8, attendance: 98 },
 ];
 
+// Mock Data for Longitudinal Trends (Enables Line Chart)
+const MATH_COHORT_TRENDS = [
+    { month: 'Sep', avgScore: 215 },
+    { month: 'Oct', avgScore: 218 },
+    { month: 'Nov', avgScore: 221 },
+    { month: 'Dec', avgScore: 224 },
+    { month: 'Jan', avgScore: 226 },
+    { month: 'Feb', avgScore: 229 },
+];
+
 interface Teacher {
     id: string;
     name: string;
@@ -47,6 +57,7 @@ const CampusView: React.FC = () => {
   const [selectedTeacher, setSelectedTeacher] = useState<Teacher | null>(null);
   const [aiSummary, setAiSummary] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
+  const [aiPrompt, setAiPrompt] = useState<string | undefined>(undefined);
 
   // AI Context Data
   const campusContext = `
@@ -55,8 +66,14 @@ const CampusView: React.FC = () => {
     Avg Attendance: 94.2%.
     Teacher Data: ${JSON.stringify(TEACHER_PULSE_DATA)}.
     Student Performance: ${JSON.stringify(STUDENT_PERFORMANCE_DATA)}.
+    10th Grade Math Cohort Growth Trends (RIT Score): ${JSON.stringify(MATH_COHORT_TRENDS)}.
     Goal: Identify high achievement/low growth students and support teachers with high failure rates.
   `;
+
+  const launchAi = (prompt?: string) => {
+    setAiPrompt(prompt);
+    setIsAiOpen(true);
+  };
 
   const handleTeacherClick = (teacher: Teacher) => {
       setSelectedTeacher(teacher);
@@ -85,7 +102,7 @@ const CampusView: React.FC = () => {
     <div className="min-h-screen bg-gray-50 font-sans relative overflow-x-hidden">
       
       {/* EdAssist AI Sidebar */}
-      <EdAssistAI isOpen={isAiOpen} onClose={() => setIsAiOpen(false)} contextData={campusContext} />
+      <EdAssistAI isOpen={isAiOpen} onClose={() => setIsAiOpen(false)} contextData={campusContext} initialPrompt={aiPrompt} role="Principal" />
 
       {/* Teacher Detail Modal */}
       {selectedTeacher && (
@@ -159,9 +176,6 @@ const CampusView: React.FC = () => {
                     <div className="text-xs font-bold text-gray-400 uppercase tracking-wider">Current View</div>
                     <div className="text-sm font-bold text-gray-700">Principal / Campus Leader</div>
                 </div>
-                <button onClick={() => setIsAiOpen(true)} className="px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg font-medium shadow-md flex items-center gap-2 transition hover:shadow-lg hover:brightness-110">
-                    <Sparkles size={18} /> Launch EdAssist AI
-                </button>
             </div>
         </div>
 
@@ -174,9 +188,20 @@ const CampusView: React.FC = () => {
                     Identifying cohorts demonstrating high achievement but low growth potential for targeted instructional intervention.
                 </p>
                 <div className="mt-6 flex gap-3">
-                    <button className="bg-white text-blue-700 px-5 py-2 rounded-full font-bold text-sm shadow-lg hover:bg-blue-50 transition flex items-center gap-2">
+                    <button 
+                        onClick={() => setIsAiOpen(true)}
+                        className="bg-white text-blue-700 px-5 py-2 rounded-full font-bold text-sm shadow-lg hover:bg-blue-50 transition flex items-center gap-2"
+                    >
+                        <Sparkles size={16} /> Launch EdAssist AI
+                    </button>
+                    
+                    <button 
+                        onClick={() => launchAi("Generate a Growth Report Line Chart showing growth trends for the 10th grade math cohort.")}
+                        className="bg-white/10 border-2 border-white/30 text-white hover:bg-white/20 px-5 py-2 rounded-full font-bold text-sm transition flex items-center gap-2"
+                    >
                         <TrendingUp size={16} /> View Growth Report
                     </button>
+
                     <button className="bg-blue-700/50 text-white border border-blue-400 px-5 py-2 rounded-full font-bold text-sm hover:bg-blue-700/70 transition flex items-center gap-2">
                         <Filter size={16} /> Filter Cohorts
                     </button>

@@ -162,7 +162,7 @@ const ParentView: React.FC = () => {
     <div className="relative min-h-screen bg-gray-50">
       
       {/* EdAssist AI Sidebar */}
-      <EdAssistAI isOpen={isAiOpen} onClose={() => setIsAiOpen(false)} contextData={parentContext} initialPrompt={aiPrompt} />
+      <EdAssistAI isOpen={isAiOpen} onClose={() => setIsAiOpen(false)} contextData={parentContext} initialPrompt={aiPrompt} role="Parent" />
 
       {/* Report Card / IEP Modal */}
       {isReportCardOpen && (
@@ -303,7 +303,7 @@ const ParentView: React.FC = () => {
                         <p className="text-sm text-gray-500">Next Conference</p>
                         <h3 className="text-lg font-bold text-gray-900">Nov 15, 4:00 PM</h3>
                     </div>
-                    <button className="text-blue-600 hover:bg-blue-50 p-2 rounded-full transition">
+                    <button onClick={() => launchAi("I have a parent-teacher conference on Nov 15. Based on my child's data, what are 3 key questions I should ask the teacher?")} className="text-blue-600 hover:bg-blue-50 p-2 rounded-full transition cursor-pointer hover:shadow-md">
                         <Mail size={20} />
                     </button>
                 </div>

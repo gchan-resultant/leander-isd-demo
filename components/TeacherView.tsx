@@ -351,7 +351,7 @@ const TeacherView: React.FC = () => {
       )}
 
       {/* EdAssist AI Sidebar */}
-      <EdAssistAI isOpen={isAiOpen} onClose={() => setIsAiOpen(false)} contextData={rosterContext} initialPrompt={aiPrompt} />
+      <EdAssistAI isOpen={isAiOpen} onClose={() => setIsAiOpen(false)} contextData={rosterContext} initialPrompt={aiPrompt} role="Teacher" />
 
       <div className={`transition-all duration-300 ease-in-out ${isAiOpen ? 'mr-0 md:mr-[450px]' : ''}`}>
         <div className="p-6 max-w-7xl mx-auto pb-24">
