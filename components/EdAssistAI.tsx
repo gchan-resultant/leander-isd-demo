@@ -17,6 +17,15 @@ const EdAssistAI: React.FC<EdAssistAIProps> = ({ contextData, isOpen, onClose, i
   const [messages, setMessages] = useState<{ role: 'user' | 'model'; text: string }[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  
+  // State to track if component has mounted to prevent initial transition flash
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    // Enable transitions shortly after mount
+    const timer = setTimeout(() => setIsMounted(true), 50);
+    return () => clearTimeout(timer);
+  }, []);
 
   // Generate Persona-Aware Greeting
   useEffect(() => {
@@ -335,7 +344,7 @@ const EdAssistAI: React.FC<EdAssistAIProps> = ({ contextData, isOpen, onClose, i
 
   return (
     <div 
-      className={`fixed inset-y-0 right-0 w-full md:w-[450px] bg-white shadow-2xl z-[60] flex flex-col border-l border-gray-200 transform transition-transform duration-300 ${
+      className={`fixed inset-y-0 right-0 w-full md:w-[450px] bg-white shadow-2xl z-[60] flex flex-col border-l border-gray-200 transform ${isMounted ? 'transition-transform duration-300' : ''} ${
         isOpen ? 'translate-x-0' : 'translate-x-full pointer-events-none'
       }`}
     >

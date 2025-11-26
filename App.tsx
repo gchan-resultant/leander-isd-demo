@@ -16,7 +16,7 @@ type AppVersion = 'pilot' | 'future';
 
 const App: React.FC = () => {
   const [role, setRole] = useState<UserRole>(UserRole.STUDENT);
-  const [appVersion, setAppVersion] = useState<AppVersion>('future');
+  const [appVersion, setAppVersion] = useState<AppVersion>('pilot');
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [showDemoGuide, setShowDemoGuide] = useState(false);
 
