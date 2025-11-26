@@ -1,160 +1,213 @@
+
 import React, { useState } from 'react';
 import { BOARD_ASSESSMENT_TRENDS, BOARD_GAP_ANALYSIS } from '../constants';
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, ReferenceLine } from 'recharts';
-import { TrendingUp, Target, Users, Info, Sparkles, ChevronDown } from 'lucide-react';
+import { TrendingUp, Target, Users, Info, Sparkles, ChevronDown, MousePointerClick } from 'lucide-react';
+import EdAssistAI from './EdAssistAI';
 
 const BoardView: React.FC = () => {
   const [selectedAssessment, setSelectedAssessment] = useState('NWEA MAP Growth: Math');
+  const [isAiOpen, setIsAiOpen] = useState(false);
+  const [aiPrompt, setAiPrompt] = useState<string | undefined>(undefined);
+
+  const boardContext = `
+    Role: Board Member / Trustee.
+    Focus: Strategic Oversight, Student Achievement (Goal 2), Equity/Closing Gaps.
+    Current View: Strategic Goals Dashboard.
+    
+    Data Available:
+    1. Assessment Trends (Longitudinal): ${JSON.stringify(BOARD_ASSESSMENT_TRENDS)}
+    2. Gap Analysis (Equity): ${JSON.stringify(BOARD_GAP_ANALYSIS)}
+    3. Campus Breakdown: Vandegrift (Exceeds), Rouse (Meets), Leander (Review).
+    
+    Functionalities:
+    - Summarize progress toward goals.
+    - Identify specific sub-populations requiring resources.
+    - Draft talking points for board meetings.
+  `;
+
+  const launchAi = (prompt: string) => {
+    setAiPrompt(prompt);
+    setIsAiOpen(true);
+  };
   
   return (
-    <div className="p-6 max-w-7xl mx-auto pb-24 space-y-8">
-      {/* Header & Context */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Strategic Goals Dashboard</h1>
-          <p className="text-gray-500">Board of Trustees View • Goal 2: Student Achievement</p>
-        </div>
-        
-        <div className="flex items-center gap-3 bg-white p-2 rounded-lg border border-gray-200 shadow-sm">
-            <span className="text-sm font-medium text-gray-600 pl-2">Assessment:</span>
-            <div className="relative">
-                <select 
-                    value={selectedAssessment}
-                    onChange={(e) => setSelectedAssessment(e.target.value)}
-                    className="appearance-none bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-64 p-2 pr-8 cursor-pointer font-medium"
+    <div className="min-h-screen bg-gray-50 relative overflow-x-hidden">
+      
+      {/* EdAssist AI Sidebar */}
+      <EdAssistAI isOpen={isAiOpen} onClose={() => setIsAiOpen(false)} contextData={boardContext} initialPrompt={aiPrompt} role="Board Member" />
+
+      <div className={`transition-all duration-300 ease-in-out ${isAiOpen ? 'mr-0 md:mr-[450px]' : ''}`}>
+          <div className="p-6 max-w-7xl mx-auto pb-24 space-y-8">
+            {/* Header & Context */}
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div>
+                <h1 className="text-3xl font-bold text-gray-900">Strategic Goals Dashboard</h1>
+                <p className="text-gray-500">Board of Trustees View • Goal 2: Student Achievement</p>
+                </div>
+                
+                <div className="flex items-center gap-3">
+                    <button 
+                        onClick={() => setIsAiOpen(true)} 
+                        className="px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg font-medium shadow-md flex items-center gap-2 transition hover:shadow-lg hover:brightness-110"
+                    >
+                        <Sparkles size={18} /> Launch EdAssist AI
+                    </button>
+                    <div className="bg-white p-2 rounded-lg border border-gray-200 shadow-sm flex items-center gap-2">
+                        <span className="text-sm font-medium text-gray-600 pl-2">Assessment:</span>
+                        <div className="relative">
+                            <select 
+                                value={selectedAssessment}
+                                onChange={(e) => setSelectedAssessment(e.target.value)}
+                                className="appearance-none bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-64 p-2 pr-8 cursor-pointer font-medium"
+                            >
+                                <option>NWEA MAP Growth: Math</option>
+                                <option>NWEA MAP Growth: Reading</option>
+                                <option>STAAR: Algebra I</option>
+                                <option>CCMR: College Readiness</option>
+                            </select>
+                            <ChevronDown className="absolute right-2 top-2.5 text-gray-500 pointer-events-none" size={16} />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* AI Summary Card */}
+            <div className="bg-gradient-to-r from-indigo-50 to-blue-50 border border-indigo-100 rounded-xl p-6 relative overflow-hidden">
+                <div className="absolute top-0 right-0 p-4 opacity-10">
+                    <Sparkles size={120} />
+                </div>
+                <div className="relative z-10">
+                    <div className="flex items-center gap-2 mb-3">
+                        <Sparkles className="text-indigo-600" size={20} />
+                        <h2 className="font-bold text-indigo-900">Executive Summary (Generated by EdAssist)</h2>
+                    </div>
+                    <p className="text-indigo-800 leading-relaxed">
+                        Based on <strong>Spring 2025</strong> projections, the district is <strong>outperforming</strong> national norms in Math by an average of <span className="font-bold bg-white/50 px-1 rounded">6 RIT points</span>. 
+                        While overall growth is positive, the gap analysis indicates that <strong>Special Education</strong> and <strong>Emergent Bilingual</strong> cohorts are growing at a slower rate than their peers, requiring targeted intervention in Tier 2 instruction.
+                    </p>
+                </div>
+            </div>
+
+            {/* Main Analytics Grid */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                
+                {/* Longitudinal Trend - CLICKABLE */}
+                <div 
+                    onClick={() => launchAi(`Analyze the District Longitudinal Growth trends shown in the chart. Specifically, why did the District Avg jump in Spring 2025 compared to the National Norm?`)}
+                    className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm cursor-pointer hover:shadow-lg hover:border-blue-300 transition group relative"
                 >
-                    <option>NWEA MAP Growth: Math</option>
-                    <option>NWEA MAP Growth: Reading</option>
-                    <option>STAAR: Algebra I</option>
-                    <option>CCMR: College Readiness</option>
-                </select>
-                <ChevronDown className="absolute right-2 top-2.5 text-gray-500 pointer-events-none" size={16} />
-            </div>
-        </div>
-      </div>
-
-      {/* AI Summary Card */}
-      <div className="bg-gradient-to-r from-indigo-50 to-blue-50 border border-indigo-100 rounded-xl p-6 relative overflow-hidden">
-         <div className="absolute top-0 right-0 p-4 opacity-10">
-            <Sparkles size={120} />
-         </div>
-         <div className="relative z-10">
-            <div className="flex items-center gap-2 mb-3">
-                <Sparkles className="text-indigo-600" size={20} />
-                <h2 className="font-bold text-indigo-900">Executive Summary (Generated by EdAssist)</h2>
-            </div>
-            <p className="text-indigo-800 leading-relaxed">
-                Based on <strong>Spring 2025</strong> projections, the district is <strong>outperforming</strong> national norms in Math by an average of <span className="font-bold bg-white/50 px-1 rounded">6 RIT points</span>. 
-                While overall growth is positive, the gap analysis indicates that <strong>Special Education</strong> and <strong>Emergent Bilingual</strong> cohorts are growing at a slower rate than their peers, requiring targeted intervention in Tier 2 instruction.
-            </p>
-         </div>
-      </div>
-
-      {/* Main Analytics Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        
-        {/* Longitudinal Trend */}
-        <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
-            <div className="flex items-center justify-between mb-6">
-                <div>
-                    <h3 className="font-bold text-lg text-gray-800">District Longitudinal Growth</h3>
-                    <p className="text-sm text-gray-500">Comparison: District Avg vs. National Norm (Mean RIT)</p>
+                    <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition text-blue-500 flex items-center gap-1 text-xs font-bold bg-blue-50 px-2 py-1 rounded">
+                        <MousePointerClick size={14} /> Analyze with AI
+                    </div>
+                    <div className="flex items-center justify-between mb-6">
+                        <div>
+                            <h3 className="font-bold text-lg text-gray-800 group-hover:text-blue-600 transition">District Longitudinal Growth</h3>
+                            <p className="text-sm text-gray-500">Comparison: District Avg vs. National Norm (Mean RIT)</p>
+                        </div>
+                        <div className="p-2 bg-blue-50 text-blue-600 rounded-lg"><TrendingUp size={20}/></div>
+                    </div>
+                    
+                    <div className="h-80 w-full pointer-events-none"> {/* pointer-events-none ensures the click hits the parent div */}
+                        <ResponsiveContainer width="100%" height="100%">
+                            <LineChart data={BOARD_ASSESSMENT_TRENDS} margin={{top: 10, right: 30, left: 0, bottom: 0}}>
+                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" />
+                                <XAxis dataKey="period" axisLine={false} tickLine={false} tick={{fill: '#6b7280'}} dy={10} />
+                                <YAxis domain={['dataMin - 5', 'dataMax + 5']} axisLine={false} tickLine={false} tick={{fill: '#6b7280'}} />
+                                <Tooltip 
+                                    contentStyle={{borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)'}}
+                                    labelStyle={{fontWeight: 'bold', color: '#111827'}}
+                                />
+                                <Legend verticalAlign="top" height={36} />
+                                <Line name="District Avg" type="monotone" dataKey="district" stroke="#3b82f6" strokeWidth={3} activeDot={{r: 6}} />
+                                <Line name="National Norm" type="monotone" dataKey="norm" stroke="#9ca3af" strokeWidth={2} strokeDasharray="5 5" />
+                                <Line name="Previous Year" type="monotone" dataKey="previous" stroke="#d1d5db" strokeWidth={2} />
+                            </LineChart>
+                        </ResponsiveContainer>
+                    </div>
                 </div>
-                <div className="p-2 bg-blue-50 text-blue-600 rounded-lg"><TrendingUp size={20}/></div>
-            </div>
-            
-            <div className="h-80 w-full">
-                <ResponsiveContainer width="100%" height="100%">
-                    <LineChart data={BOARD_ASSESSMENT_TRENDS} margin={{top: 10, right: 30, left: 0, bottom: 0}}>
-                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" />
-                        <XAxis dataKey="period" axisLine={false} tickLine={false} tick={{fill: '#6b7280'}} dy={10} />
-                        <YAxis domain={['dataMin - 5', 'dataMax + 5']} axisLine={false} tickLine={false} tick={{fill: '#6b7280'}} />
-                        <Tooltip 
-                            contentStyle={{borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)'}}
-                            labelStyle={{fontWeight: 'bold', color: '#111827'}}
-                        />
-                        <Legend verticalAlign="top" height={36} />
-                        <Line name="District Avg" type="monotone" dataKey="district" stroke="#3b82f6" strokeWidth={3} activeDot={{r: 6}} />
-                        <Line name="National Norm" type="monotone" dataKey="norm" stroke="#9ca3af" strokeWidth={2} strokeDasharray="5 5" />
-                        <Line name="Previous Year" type="monotone" dataKey="previous" stroke="#d1d5db" strokeWidth={2} />
-                    </LineChart>
-                </ResponsiveContainer>
-            </div>
-        </div>
 
-        {/* Gap Analysis */}
-        <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
-            <div className="flex items-center justify-between mb-6">
-                <div>
-                    <h3 className="font-bold text-lg text-gray-800">Equity & Gap Analysis</h3>
-                    <p className="text-sm text-gray-500">% Meeting Growth Projections by Sub-population</p>
+                {/* Gap Analysis - CLICKABLE */}
+                <div 
+                    onClick={() => launchAi(`Analyze the Equity & Gap Analysis chart. Which groups are missing the 80% target, and what specific resources should the board consider allocating to close the gap for ${BOARD_GAP_ANALYSIS.find(g => g.current < 50)?.group}?`)}
+                    className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm cursor-pointer hover:shadow-lg hover:border-purple-300 transition group relative"
+                >
+                    <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition text-purple-500 flex items-center gap-1 text-xs font-bold bg-purple-50 px-2 py-1 rounded">
+                        <MousePointerClick size={14} /> Analyze with AI
+                    </div>
+                    <div className="flex items-center justify-between mb-6">
+                        <div>
+                            <h3 className="font-bold text-lg text-gray-800 group-hover:text-purple-600 transition">Equity & Gap Analysis</h3>
+                            <p className="text-sm text-gray-500">% Meeting Growth Projections by Sub-population</p>
+                        </div>
+                        <div className="p-2 bg-purple-50 text-purple-600 rounded-lg"><Users size={20}/></div>
+                    </div>
+                    
+                    <div className="h-80 w-full pointer-events-none">
+                        <ResponsiveContainer width="100%" height="100%">
+                            <BarChart data={BOARD_GAP_ANALYSIS} layout="vertical" margin={{top: 5, right: 30, left: 40, bottom: 5}}>
+                                <CartesianGrid strokeDasharray="3 3" horizontal={false} />
+                                <XAxis type="number" domain={[0, 100]} hide />
+                                <YAxis dataKey="group" type="category" tick={{fontSize: 12, fontWeight: 500}} width={100} />
+                                <Tooltip 
+                                    cursor={{fill: '#f3f4f6'}}
+                                    contentStyle={{borderRadius: '8px'}}
+                                />
+                                <Legend />
+                                <ReferenceLine x={80} stroke="red" strokeDasharray="3 3" label={{ position: 'top', value: 'Goal (80%)', fill: 'red', fontSize: 10 }} />
+                                <Bar name="Current % Met" dataKey="current" fill="#8b5cf6" radius={[0, 4, 4, 0]} barSize={24}>
+                                </Bar>
+                                <Bar name="Target %" dataKey="target" fill="#e5e7eb" radius={[0, 4, 4, 0]} barSize={24} />
+                            </BarChart>
+                        </ResponsiveContainer>
+                    </div>
                 </div>
-                <div className="p-2 bg-purple-50 text-purple-600 rounded-lg"><Users size={20}/></div>
-            </div>
-            
-            <div className="h-80 w-full">
-                <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={BOARD_GAP_ANALYSIS} layout="vertical" margin={{top: 5, right: 30, left: 40, bottom: 5}}>
-                        <CartesianGrid strokeDasharray="3 3" horizontal={false} />
-                        <XAxis type="number" domain={[0, 100]} hide />
-                        <YAxis dataKey="group" type="category" tick={{fontSize: 12, fontWeight: 500}} width={100} />
-                        <Tooltip 
-                             cursor={{fill: '#f3f4f6'}}
-                             contentStyle={{borderRadius: '8px'}}
-                        />
-                        <Legend />
-                        <ReferenceLine x={80} stroke="red" strokeDasharray="3 3" label={{ position: 'top', value: 'Goal (80%)', fill: 'red', fontSize: 10 }} />
-                        <Bar name="Current % Met" dataKey="current" fill="#8b5cf6" radius={[0, 4, 4, 0]} barSize={24}>
-                        </Bar>
-                        <Bar name="Target %" dataKey="target" fill="#e5e7eb" radius={[0, 4, 4, 0]} barSize={24} />
-                    </BarChart>
-                </ResponsiveContainer>
-            </div>
-        </div>
 
-        {/* Detailed Breakdown Table */}
-        <div className="lg:col-span-2 bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-            <div className="p-6 border-b border-gray-100 flex justify-between items-center">
-                <h3 className="font-bold text-lg text-gray-800">Campus Performance Breakdown</h3>
-                <button className="text-blue-600 text-sm font-medium hover:underline">Download Full Report</button>
+                {/* Detailed Breakdown Table */}
+                <div className="lg:col-span-2 bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+                    <div className="p-6 border-b border-gray-100 flex justify-between items-center">
+                        <h3 className="font-bold text-lg text-gray-800">Campus Performance Breakdown</h3>
+                        <button className="text-blue-600 text-sm font-medium hover:underline">Download Full Report</button>
+                    </div>
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-left text-sm">
+                            <thead className="bg-gray-50 text-gray-500 font-medium">
+                                <tr>
+                                    <th className="p-4">Campus Name</th>
+                                    <th className="p-4">Total Students Tested</th>
+                                    <th className="p-4 text-center">Mean RIT</th>
+                                    <th className="p-4 text-center">Growth %</th>
+                                    <th className="p-4 text-center">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-gray-100">
+                                <tr className="hover:bg-gray-50">
+                                    <td className="p-4 font-medium text-gray-900">Vandegrift HS</td>
+                                    <td className="p-4 text-gray-500">2,104</td>
+                                    <td className="p-4 text-center font-bold text-gray-800">245</td>
+                                    <td className="p-4 text-center text-green-600 font-bold">+5.2%</td>
+                                    <td className="p-4 text-center"><span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">Exceeds</span></td>
+                                </tr>
+                                <tr className="hover:bg-gray-50">
+                                    <td className="p-4 font-medium text-gray-900">Rouse HS</td>
+                                    <td className="p-4 text-gray-500">1,850</td>
+                                    <td className="p-4 text-center font-bold text-gray-800">238</td>
+                                    <td className="p-4 text-center text-green-600 font-bold">+3.1%</td>
+                                    <td className="p-4 text-center"><span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">Meets</span></td>
+                                </tr>
+                                <tr className="hover:bg-gray-50">
+                                    <td className="p-4 font-medium text-gray-900">Leander HS</td>
+                                    <td className="p-4 text-gray-500">2,012</td>
+                                    <td className="p-4 text-center font-bold text-gray-800">232</td>
+                                    <td className="p-4 text-center text-yellow-600 font-bold">+1.2%</td>
+                                    <td className="p-4 text-center"><span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">Review</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
-            <div className="overflow-x-auto">
-                <table className="w-full text-left text-sm">
-                    <thead className="bg-gray-50 text-gray-500 font-medium">
-                        <tr>
-                            <th className="p-4">Campus Name</th>
-                            <th className="p-4">Total Students Tested</th>
-                            <th className="p-4 text-center">Mean RIT</th>
-                            <th className="p-4 text-center">Growth %</th>
-                            <th className="p-4 text-center">Status</th>
-                        </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-100">
-                        <tr className="hover:bg-gray-50">
-                            <td className="p-4 font-medium text-gray-900">Vandegrift HS</td>
-                            <td className="p-4 text-gray-500">2,104</td>
-                            <td className="p-4 text-center font-bold text-gray-800">245</td>
-                            <td className="p-4 text-center text-green-600 font-bold">+5.2%</td>
-                            <td className="p-4 text-center"><span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">Exceeds</span></td>
-                        </tr>
-                        <tr className="hover:bg-gray-50">
-                            <td className="p-4 font-medium text-gray-900">Rouse HS</td>
-                            <td className="p-4 text-gray-500">1,850</td>
-                            <td className="p-4 text-center font-bold text-gray-800">238</td>
-                            <td className="p-4 text-center text-green-600 font-bold">+3.1%</td>
-                            <td className="p-4 text-center"><span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">Meets</span></td>
-                        </tr>
-                        <tr className="hover:bg-gray-50">
-                            <td className="p-4 font-medium text-gray-900">Leander HS</td>
-                            <td className="p-4 text-gray-500">2,012</td>
-                            <td className="p-4 text-center font-bold text-gray-800">232</td>
-                            <td className="p-4 text-center text-yellow-600 font-bold">+1.2%</td>
-                            <td className="p-4 text-center"><span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">Review</span></td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
+          </div>
       </div>
     </div>
   );

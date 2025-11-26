@@ -36,6 +36,9 @@ const EdAssistAI: React.FC<EdAssistAIProps> = ({ contextData, isOpen, onClose, i
             case 'Parent':
                 greeting = "Hello! I'm EdAssist, your family virtual assistant. I'm here to help you understand your child's progress, goals, and report cards. What questions do you have?";
                 break;
+            case 'Board Member':
+                greeting = "Hello! I'm EdAssist, your governance support assistant. I have access to district-wide strategic goals, longitudinal trends, and equity data. How can I help you prepare for the next meeting or analyze gap closure?";
+                break;
         }
         setMessages([{ role: 'model', text: greeting }]);
     }
