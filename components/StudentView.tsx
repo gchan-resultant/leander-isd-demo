@@ -1,20 +1,102 @@
 
 import React, { useState } from 'react';
 import { MOCK_STUDENT, ASSETS } from '../constants';
-import { Target, Trophy, Upload, FileText, Image as ImageIcon, User, Star, BookOpen, Sun, Smile, Rocket, Video, Plus, Calendar, Tag, X, Check, Clock } from 'lucide-react';
+import { Target, Trophy, Upload, FileText, Image as ImageIcon, User, Star, BookOpen, Sun, Smile, Rocket, Video, Plus, Calendar, Tag, X, Check, Clock, CloudUpload, Link as LinkIcon } from 'lucide-react';
+import { Student, Artifact, Goal } from '../types';
 
 const StudentView: React.FC = () => {
+  // Use state for student data to allow updates (adding artifacts)
+  const [student, setStudent] = useState<Student>(MOCK_STUDENT);
   const [kidMode, setKidMode] = useState(false); // Toggle between Elementary/HS UI
-  const [uploading, setUploading] = useState(false);
+  
+  // Add Goal Modal State
   const [isAddGoalOpen, setIsAddGoalOpen] = useState(false);
-  const [newGoal, setNewGoal] = useState({ title: '', type: 'Academic', date: '', description: '' });
+  const [newGoal, setNewGoal] = useState<{title: string; type: string; dueDate: string; description: string}>({
+      title: '',
+      type: 'Academic',
+      dueDate: '',
+      description: ''
+  });
+  
+  // Add Artifact Modal State
+  const [isAddArtifactOpen, setIsAddArtifactOpen] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [newArtifact, setNewArtifact] = useState<{title: string; linkedGoalId: string; type: 'image' | 'document' | 'video'}>({
+      title: '',
+      linkedGoalId: '',
+      type: 'document'
+  });
 
-  const handleUpload = () => {
-    setUploading(true);
-    setTimeout(() => setUploading(false), 1500); // Simulate upload
+  const handleOpenArtifactModal = () => {
+      setNewArtifact({ title: '', linkedGoalId: '', type: 'document' });
+      setSelectedFile(null);
+      setIsAddArtifactOpen(true);
   };
 
-  const student = MOCK_STUDENT;
+  const handleSimulateUpload = () => {
+      // Simulate file selection
+      const file = new File(["dummy content"], "math_unit_5_scan.jpg", { type: "image/jpeg" });
+      setSelectedFile(file);
+      
+      // Auto-fill form for the demo flow
+      const mathGoal = student.goals.find(g => g.title.toLowerCase().includes("math"));
+      setNewArtifact(prev => ({
+          ...prev,
+          title: "Math Assessment - Unit 5",
+          type: 'image',
+          linkedGoalId: mathGoal ? mathGoal.id : prev.linkedGoalId
+      }));
+  };
+
+  const handleSaveArtifact = () => {
+      if (!newArtifact.title) return;
+      setIsUploading(true);
+      
+      // Simulate network request and update state
+      setTimeout(() => {
+          const artifact: Artifact = {
+              id: `new-${Date.now()}`,
+              title: newArtifact.title,
+              type: newArtifact.type,
+              url: '#', // Mock URL
+              date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+              tags: ['New', 'Portfolio'],
+              linkedGoalId: newArtifact.linkedGoalId || undefined
+          };
+
+          setStudent(prev => ({
+              ...prev,
+              artifacts: [artifact, ...prev.artifacts]
+          }));
+
+          setIsUploading(false);
+          setIsAddArtifactOpen(false);
+      }, 1500);
+  };
+
+  const handleSaveGoal = () => {
+      if (!newGoal.title) return;
+
+      const goal: Goal = {
+          id: `new-goal-${Date.now()}`,
+          title: newGoal.title,
+          description: newGoal.description || 'New goal',
+          progress: 0,
+          type: newGoal.type as any,
+          dueDate: newGoal.dueDate || new Date().toLocaleDateString('en-US'),
+          status: 'In Progress'
+      };
+
+      setStudent(prev => ({
+          ...prev,
+          goals: [goal, ...prev.goals]
+      }));
+
+      // Reset and close
+      setNewGoal({ title: '', type: 'Academic', dueDate: '', description: '' });
+      setIsAddGoalOpen(false);
+  };
 
   // ----------------------------------------------------------------------
   // ELEMENTARY MODE LAYOUT
@@ -23,6 +105,70 @@ const StudentView: React.FC = () => {
     return (
       <div className="p-4 md:p-8 max-w-6xl mx-auto space-y-8 pb-24 bg-sky-50 min-h-screen font-sans">
         
+        {/* Upload Modal (Shared) */}
+        {isAddArtifactOpen && (
+             <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[60] flex items-center justify-center p-4 animate-fadeIn">
+                <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full overflow-hidden border-4 border-blue-200">
+                    <div className="bg-blue-400 p-5 flex justify-between items-center text-white">
+                        <h3 className="font-bold text-2xl flex items-center gap-2"><CloudUpload size={28}/> Add Work</h3>
+                        <button onClick={() => setIsAddArtifactOpen(false)} className="hover:bg-white/20 p-2 rounded-full transition"><X size={24} /></button>
+                    </div>
+                    
+                    <div className="p-6 space-y-5 bg-white">
+                        <div 
+                            onClick={handleSimulateUpload}
+                            className={`border-4 border-dashed rounded-3xl p-8 flex flex-col items-center justify-center transition cursor-pointer ${selectedFile ? 'border-green-300 bg-green-50 text-green-600' : 'border-blue-100 text-blue-300 bg-blue-50 hover:bg-blue-100'}`}
+                        >
+                            {selectedFile ? (
+                                <>
+                                    <Check size={48} />
+                                    <p className="font-bold text-lg mt-2 text-center break-all">{selectedFile.name}</p>
+                                </>
+                            ) : (
+                                <>
+                                    <CloudUpload size={48} />
+                                    <p className="font-bold text-lg mt-2">Tap to Upload</p>
+                                </>
+                            )}
+                        </div>
+                        
+                        <div>
+                            <label className="block font-bold text-gray-600 mb-1 ml-1">What is this?</label>
+                            <input 
+                                type="text" 
+                                value={newArtifact.title}
+                                onChange={(e) => setNewArtifact({...newArtifact, title: e.target.value})}
+                                placeholder="My Drawing..." 
+                                className="w-full border-2 border-gray-200 rounded-xl p-3 text-lg font-medium focus:border-blue-400 outline-none" 
+                            />
+                        </div>
+
+                         <div>
+                            <label className="block font-bold text-gray-600 mb-1 ml-1">For which mission?</label>
+                            <select 
+                                 value={newArtifact.linkedGoalId}
+                                 onChange={(e) => setNewArtifact({...newArtifact, linkedGoalId: e.target.value})}
+                                 className="w-full border-2 border-gray-200 bg-white rounded-xl p-3 text-lg font-medium outline-none"
+                            >
+                                <option value="">-- Just for fun --</option>
+                                {student.goals.map(g => (
+                                    <option key={g.id} value={g.id}>{g.title}</option>
+                                ))}
+                            </select>
+                        </div>
+
+                        <button 
+                            onClick={handleSaveArtifact}
+                            disabled={!newArtifact.title || isUploading}
+                            className="w-full bg-green-500 hover:bg-green-600 text-white py-4 rounded-2xl font-black text-xl shadow-lg transform active:scale-95 transition flex items-center justify-center gap-2"
+                        >
+                            {isUploading ? 'Saving...' : <><Check size={24} /> Save It!</>}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        )}
+
         {/* Top Navigation / Toggle */}
         <div className="flex justify-between items-center">
           <div className="flex items-center gap-3">
@@ -149,10 +295,10 @@ const StudentView: React.FC = () => {
                         <h2 className="text-3xl font-bold text-gray-800">Backpack</h2>
                     </div>
                     <button 
-                        onClick={handleUpload}
+                        onClick={handleOpenArtifactModal}
                         className="bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-2xl shadow-lg shadow-blue-200 active:scale-95 transition"
                     >
-                        {uploading ? <span className="animate-spin block">⌛</span> : <Upload size={24} />}
+                         <Upload size={24} />
                     </button>
                 </div>
 
@@ -169,7 +315,7 @@ const StudentView: React.FC = () => {
                     ))}
                      
                      {/* Add New Placeholder */}
-                     <button onClick={handleUpload} className="bg-gray-100 border-2 border-dashed border-gray-300 rounded-3xl flex flex-col items-center justify-center text-gray-400 hover:bg-blue-50 hover:border-blue-300 hover:text-blue-500 transition aspect-square">
+                     <button onClick={handleOpenArtifactModal} className="bg-gray-100 border-2 border-dashed border-gray-300 rounded-3xl flex flex-col items-center justify-center text-gray-400 hover:bg-blue-50 hover:border-blue-300 hover:text-blue-500 transition aspect-square">
                         <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm mb-1">
                             <span className="text-xl font-bold">+</span>
                         </div>
@@ -188,6 +334,106 @@ const StudentView: React.FC = () => {
   return (
     <div className="p-6 max-w-7xl mx-auto space-y-10 pb-32 min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/50 to-indigo-50/30">
       
+      {/* Add Artifact Modal */}
+      {isAddArtifactOpen && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[60] flex items-center justify-center p-4 animate-fadeIn">
+            <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden transform transition-all scale-100 border border-white/20">
+                <div className="bg-indigo-600 p-5 flex justify-between items-center text-white">
+                    <h3 className="font-bold text-xl flex items-center gap-2"><Upload size={20}/> Add to Backpack</h3>
+                    <button onClick={() => setIsAddArtifactOpen(false)} className="hover:bg-white/20 p-1 rounded-full transition"><X size={20} /></button>
+                </div>
+                
+                <div className="p-6 space-y-5 bg-gray-50/50">
+                    {/* File Drop Zone Simulation */}
+                    <div 
+                        onClick={handleSimulateUpload}
+                        className={`border-2 border-dashed rounded-xl p-8 flex flex-col items-center justify-center transition cursor-pointer group ${selectedFile ? 'border-green-400 bg-green-50' : 'border-gray-300 bg-white hover:bg-blue-50 hover:border-blue-400'}`}
+                    >
+                        {selectedFile ? (
+                             <>
+                                <div className="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mb-3">
+                                    <Check size={32} />
+                                </div>
+                                <p className="text-sm font-bold text-green-700">{selectedFile.name}</p>
+                                <p className="text-xs text-green-600 mt-1">Ready to upload</p>
+                             </>
+                        ) : (
+                             <>
+                                <div className="w-16 h-16 bg-indigo-50 text-indigo-500 rounded-full flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                                    <CloudUpload size={32} />
+                                </div>
+                                <p className="text-sm font-semibold text-gray-700">Click to upload or drag and drop</p>
+                                <p className="text-xs text-gray-400 mt-1">PDF, JPG, MP4 (Max 10MB)</p>
+                             </>
+                        )}
+                    </div>
+
+                    {/* Form Fields */}
+                    <div>
+                        <label className="block text-sm font-semibold text-gray-700 mb-1.5">Artifact Title</label>
+                        <input 
+                            type="text" 
+                            value={newArtifact.title}
+                            onChange={(e) => setNewArtifact({...newArtifact, title: e.target.value})}
+                            placeholder="e.g. History Essay Final Draft" 
+                            className="w-full border border-gray-200 bg-white rounded-xl p-3 focus:ring-2 focus:ring-indigo-500 outline-none shadow-sm" 
+                        />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                         <div>
+                            <label className="block text-sm font-semibold text-gray-700 mb-1.5">Type</label>
+                            <select 
+                                value={newArtifact.type}
+                                onChange={(e) => setNewArtifact({...newArtifact, type: e.target.value as any})}
+                                className="w-full border border-gray-200 bg-white rounded-xl p-3 outline-none shadow-sm"
+                            >
+                                <option value="document">Document</option>
+                                <option value="image">Image</option>
+                                <option value="video">Video</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label className="block text-sm font-semibold text-gray-700 mb-1.5 flex items-center gap-1">
+                                <LinkIcon size={14} /> Link to Goal
+                            </label>
+                            <select 
+                                 value={newArtifact.linkedGoalId}
+                                 onChange={(e) => setNewArtifact({...newArtifact, linkedGoalId: e.target.value})}
+                                 className="w-full border border-gray-200 bg-white rounded-xl p-3 outline-none shadow-sm"
+                            >
+                                <option value="">-- No Goal --</option>
+                                {student.goals.map(g => (
+                                    <option key={g.id} value={g.id}>{g.title}</option>
+                                ))}
+                            </select>
+                        </div>
+                    </div>
+
+                    {/* Actions */}
+                    <div className="pt-2">
+                        <button 
+                            onClick={handleSaveArtifact}
+                            disabled={!newArtifact.title || isUploading}
+                            className={`w-full py-3 rounded-xl font-bold shadow-lg transition flex items-center justify-center gap-2 ${!newArtifact.title || isUploading ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : 'bg-indigo-600 text-white hover:bg-indigo-700 hover:shadow-xl active:scale-[0.98]'}`}
+                        >
+                            {isUploading ? (
+                                <>
+                                    <span className="animate-spin w-5 h-5 border-2 border-white border-t-transparent rounded-full"></span>
+                                    Uploading...
+                                </>
+                            ) : (
+                                <>
+                                    <Check size={18} /> Save to Backpack
+                                </>
+                            )}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+      )}
+
       {/* Add Goal Modal */}
       {isAddGoalOpen && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-md z-50 flex items-center justify-center p-4 animate-fadeIn">
@@ -199,28 +445,52 @@ const StudentView: React.FC = () => {
                 <div className="p-6 space-y-5 bg-gray-50/50">
                     <div>
                         <label className="block text-sm font-semibold text-gray-700 mb-1.5">Goal Name</label>
-                        <input type="text" placeholder="e.g. Improve Biology Grade" className="w-full border border-gray-200 bg-white rounded-xl p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none shadow-sm transition" />
+                        <input 
+                            type="text" 
+                            value={newGoal.title}
+                            onChange={(e) => setNewGoal({...newGoal, title: e.target.value})}
+                            placeholder="e.g. Improve Biology Grade" 
+                            className="w-full border border-gray-200 bg-white rounded-xl p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none shadow-sm transition" 
+                        />
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                         <div>
                             <label className="block text-sm font-semibold text-gray-700 mb-1.5">Goal Type</label>
-                            <select className="w-full border border-gray-200 bg-white rounded-xl p-3 outline-none shadow-sm">
-                                <option>Academic</option>
-                                <option>Personal</option>
-                                <option>Study Habits</option>
-                                <option>College/Career</option>
+                            <select 
+                                value={newGoal.type}
+                                onChange={(e) => setNewGoal({...newGoal, type: e.target.value})}
+                                className="w-full border border-gray-200 bg-white rounded-xl p-3 outline-none shadow-sm"
+                            >
+                                <option value="Academic">Academic</option>
+                                <option value="Personal">Personal</option>
+                                <option value="Study Habits">Study Habits</option>
+                                <option value="College/Career">College/Career</option>
                             </select>
                         </div>
                         <div>
                             <label className="block text-sm font-semibold text-gray-700 mb-1.5">Achieve By</label>
-                            <input type="date" className="w-full border border-gray-200 bg-white rounded-xl p-3 outline-none shadow-sm" />
+                            <input 
+                                type="date" 
+                                value={newGoal.dueDate}
+                                onChange={(e) => setNewGoal({...newGoal, dueDate: e.target.value})}
+                                className="w-full border border-gray-200 bg-white rounded-xl p-3 outline-none shadow-sm" 
+                            />
                         </div>
                     </div>
                     <div>
                         <label className="block text-sm font-semibold text-gray-700 mb-1.5">Measurement / Details</label>
-                        <textarea rows={3} placeholder="How will you measure success?" className="w-full border border-gray-200 bg-white rounded-xl p-3 focus:ring-2 focus:ring-blue-500 outline-none shadow-sm resize-none" />
+                        <textarea 
+                            rows={3} 
+                            value={newGoal.description}
+                            onChange={(e) => setNewGoal({...newGoal, description: e.target.value})}
+                            placeholder="How will you measure success?" 
+                            className="w-full border border-gray-200 bg-white rounded-xl p-3 focus:ring-2 focus:ring-blue-500 outline-none shadow-sm resize-none" 
+                        />
                     </div>
-                    <button onClick={() => setIsAddGoalOpen(false)} className="w-full bg-blue-600 text-white py-3 rounded-xl font-bold hover:bg-blue-700 shadow-lg hover:shadow-xl transition transform active:scale-[0.98]">
+                    <button 
+                        onClick={handleSaveGoal} 
+                        className="w-full bg-blue-600 text-white py-3 rounded-xl font-bold hover:bg-blue-700 shadow-lg hover:shadow-xl transition transform active:scale-[0.98]"
+                    >
                         Create Goal
                     </button>
                 </div>
@@ -375,14 +645,14 @@ const StudentView: React.FC = () => {
         <div className="flex items-center justify-between mb-6 pl-1">
            <div className="flex items-center space-x-3">
             <div className="p-2 bg-indigo-100 rounded-lg text-indigo-600 shadow-sm"><FileText size={24} /></div>
-            <h2 className="font-bold text-2xl text-gray-800">My Artifacts</h2>
+            <h2 className="font-bold text-2xl text-gray-800">My Backpack</h2>
            </div>
            <button 
-             onClick={handleUpload}
+             onClick={handleOpenArtifactModal}
              className="group flex items-center gap-2 px-4 py-2 rounded-xl border border-indigo-200 text-indigo-600 font-bold text-sm hover:bg-indigo-50 hover:border-indigo-300 transition bg-white shadow-sm"
             >
-             {uploading ? <span className="animate-spin">⌛</span> : <Plus size={18} className="group-hover:rotate-90 transition-transform duration-300"/>}
-             <span>{uploading ? 'Uploading...' : 'Add New Work'}</span>
+             <Plus size={18} className="group-hover:rotate-90 transition-transform duration-300"/>
+             <span>Add New Work</span>
            </button>
         </div>
         

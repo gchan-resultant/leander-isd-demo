@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { DISTRICT_ANALYTICS } from '../constants';
 import { DollarSign, GraduationCap, CheckCircle2, FileText, Search, LayoutGrid, Sparkles, Settings, X, Wand2, Plus, ArrowRight } from 'lucide-react';
@@ -8,7 +7,7 @@ import EdAssistAI from './EdAssistAI';
 const ReportIcon = ({ type }: { type: string }) => {
     const baseClass = "w-12 h-12 flex items-center justify-center text-white rounded-xl shadow-sm mb-4";
     switch (type) {
-        case 'public': return <div className={`${baseClass} bg-blue-600`}><LayoutGrid size={24} /></div>;
+        case 'public': return <div className={`${baseClass} bg-vt-blue`}><LayoutGrid size={24} /></div>;
         case 'school': return <div className={`${baseClass} bg-purple-600`}><GraduationCap size={24} /></div>;
         case 'agency': return <div className={`${baseClass} bg-orange-500`}><FileText size={24} /></div>;
         case 'finance': return <div className={`${baseClass} bg-green-600`}><DollarSign size={24} /></div>;
@@ -177,7 +176,7 @@ const AdminView: React.FC = () => {
                                 value={configInput}
                                 onChange={(e) => setConfigInput(e.target.value)}
                                 placeholder="e.g., 'Create a bar chart showing student attendance trends broken down by high school campus for the last semester.'"
-                                className="w-full h-32 border border-gray-300 rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none resize-none mb-4"
+                                className="w-full h-32 border border-vt-borderGrey rounded-xl p-3 text-sm focus:ring-2 focus:ring-vt-lightBlue focus:border-vt-blue outline-none resize-none mb-4"
                             />
                             <div className="flex justify-end gap-3">
                                 <button 
@@ -188,7 +187,7 @@ const AdminView: React.FC = () => {
                                 </button>
                                 <button 
                                     onClick={handleVerifyReport}
-                                    className="px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg font-bold text-sm shadow-md flex items-center gap-2 hover:shadow-lg transition"
+                                    className="px-4 py-2 bg-gradient-to-r from-vt-blue to-vt-lightBlue text-white rounded-lg font-bold text-sm shadow-md flex items-center gap-2 hover:shadow-lg transition"
                                 >
                                     <Wand2 size={16} /> Draft Configuration
                                 </button>
@@ -245,7 +244,7 @@ const AdminView: React.FC = () => {
         {/* White Header (Matching Teacher View) */}
         <div className="bg-white border-b border-gray-200 px-6 py-4 flex justify-between items-center sticky top-0 z-30 shadow-sm">
             <div className="flex items-center gap-3">
-                <div className="bg-slate-800 p-2 rounded-lg">
+                <div className="bg-vt-blue p-2 rounded-lg">
                 <LayoutGrid size={24} className="text-white" />
                 </div>
                 <div>
@@ -272,7 +271,7 @@ const AdminView: React.FC = () => {
                         </p>
                         <button 
                             onClick={() => setIsAiOpen(true)} 
-                            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-bold transition shadow-lg flex items-center gap-2"
+                            className="bg-vt-blue hover:bg-vt-darkBlue text-white px-6 py-3 rounded-lg font-bold transition shadow-lg flex items-center gap-2"
                         >
                             <Sparkles size={18} /> Launch EdAssist AI
                         </button>
@@ -291,7 +290,7 @@ const AdminView: React.FC = () => {
         {/* Filter Bar */}
         <div className="bg-white border-b border-gray-200 shadow-sm sticky top-20 z-20">
                 <div className="max-w-7xl mx-auto px-6 py-3 flex gap-6 overflow-x-auto text-sm font-medium text-gray-500">
-                    <button className="text-blue-600 border-b-2 border-blue-600 pb-3 -mb-3.5">All Reports</button>
+                    <button className="text-vt-blue border-b-2 border-vt-blue pb-3 -mb-3.5">All Reports</button>
                     <button className="hover:text-gray-800 transition pb-3">Public</button>
                     <button className="hover:text-gray-800 transition pb-3">School</button>
                     <button className="hover:text-gray-800 transition pb-3">Agency</button>
@@ -317,13 +316,13 @@ const AdminView: React.FC = () => {
                             )}
                             <ReportIcon type={report.type} />
                             <div className="flex justify-between items-start mb-2">
-                                <h3 className="font-bold text-lg text-gray-900 group-hover:text-blue-600 transition">{report.title}</h3>
+                                <h3 className="font-bold text-lg text-gray-900 group-hover:text-vt-blue transition">{report.title}</h3>
                                 <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">{report.category}</span>
                             </div>
                             <p className="text-gray-500 text-sm leading-relaxed line-clamp-3">
                                 {report.description}
                             </p>
-                            <div className="mt-4 flex items-center text-blue-600 text-xs font-bold opacity-0 group-hover:opacity-100 transition-opacity">
+                            <div className="mt-4 flex items-center text-vt-blue text-xs font-bold opacity-0 group-hover:opacity-100 transition-opacity">
                                 View Report <ArrowRight size={12} className="ml-1" />
                             </div>
                         </div>
@@ -332,7 +331,7 @@ const AdminView: React.FC = () => {
                     {/* Configure Reports - Trigger Tile */}
                     <button 
                         onClick={() => setIsConfigModalOpen(true)}
-                        className="bg-gray-50 p-6 rounded-xl border-2 border-dashed border-gray-300 hover:border-blue-400 hover:bg-blue-50 transition flex flex-col items-center justify-center text-gray-400 hover:text-blue-600 group min-h-[250px]"
+                        className="bg-gray-50 p-6 rounded-xl border-2 border-dashed border-gray-300 hover:border-vt-blue hover:bg-blue-50 transition flex flex-col items-center justify-center text-gray-400 hover:text-vt-blue group min-h-[250px]"
                     >
                         <div className="w-12 h-12 bg-white rounded-full shadow-sm flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
                             <Plus size={24} />

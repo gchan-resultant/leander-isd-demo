@@ -133,6 +133,15 @@ export const BOARD_GAP_ANALYSIS = [
   { group: 'Gifted', current: 98, target: 95 },
 ];
 
+// New Data for Teacher Turnover Correlation
+export const BOARD_TURNOVER_DATA = [
+  { campus: 'Glenn HS', turnover: 24, growth: -2.5, cost: 380000, subject: 'Math' },
+  { campus: 'Leander HS', turnover: 18, growth: 1.2, cost: 240000, subject: 'Math' },
+  { campus: 'Cedar Park HS', turnover: 14, growth: 3.5, cost: 180000, subject: 'Math' },
+  { campus: 'Rouse HS', turnover: 10, growth: 4.8, cost: 120000, subject: 'Math' },
+  { campus: 'Vandegrift HS', turnover: 6, growth: 6.2, cost: 80000, subject: 'Math' },
+];
+
 // New Data for Data Studio Scenarios
 export const SUB_IMPACT_DATA = [
   { category: 'Certified Teacher', avgGrowth: 12.5, attendance: 96, count: 850 },

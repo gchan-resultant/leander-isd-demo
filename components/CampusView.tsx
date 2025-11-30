@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { ResponsiveContainer, ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ReferenceLine, Cell } from 'recharts';
 import { Search, Filter, Download, Users, TrendingUp, AlertCircle, BookOpen, GraduationCap, Calendar, ArrowRight, ChevronDown, X, Sparkles, Send, Mail, Phone } from 'lucide-react';
@@ -123,7 +122,7 @@ const CampusView: React.FC = () => {
                         </div>
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 text-center">
                             <div className="text-xs text-gray-500 font-bold uppercase">Attendance</div>
-                            <div className="text-2xl font-bold text-blue-600">{selectedTeacher.attendance}%</div>
+                            <div className="text-2xl font-bold text-vt-blue">{selectedTeacher.attendance}%</div>
                         </div>
                         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 text-center">
                             <div className="text-xs text-gray-500 font-bold uppercase">Observation Score</div>
@@ -146,10 +145,10 @@ const CampusView: React.FC = () => {
                             )}
                         </div>
                         <div className="flex gap-2 mt-4 justify-end">
-                            <button className="px-3 py-1.5 bg-white border border-indigo-200 text-indigo-600 rounded text-xs font-bold hover:bg-indigo-50 flex items-center gap-1">
+                            <button className="px-3 py-1.5 bg-white border border-indigo-200 text-vt-blue rounded text-xs font-bold hover:bg-indigo-50 flex items-center gap-1">
                                 <Mail size={12} /> Email Summary
                             </button>
-                            <button className="px-3 py-1.5 bg-indigo-600 text-white rounded text-xs font-bold hover:bg-indigo-700 flex items-center gap-1">
+                            <button className="px-3 py-1.5 bg-vt-blue text-white rounded text-xs font-bold hover:bg-vt-darkBlue flex items-center gap-1">
                                 <Calendar size={12} /> Schedule Meeting
                             </button>
                         </div>
@@ -164,7 +163,7 @@ const CampusView: React.FC = () => {
         <div className="bg-white border-b border-gray-200 px-6 py-4 flex justify-between items-center sticky top-0 z-20 shadow-sm">
             <div className="flex items-center gap-3">
                 <div className="bg-blue-100 p-2 rounded-full">
-                    <GraduationCap size={24} className="text-blue-600" />
+                    <GraduationCap size={24} className="text-vt-blue" />
                 </div>
                 <div>
                     <h1 className="font-bold text-2xl text-gray-900 leading-none">Campus Insights</h1>
@@ -180,7 +179,7 @@ const CampusView: React.FC = () => {
         </div>
 
         {/* Hero Section */}
-        <div className="bg-gradient-to-r from-indigo-600 to-blue-600 px-6 py-10 text-white shadow-lg relative overflow-hidden">
+        <div className="bg-gradient-to-r from-vt-blue to-vt-lightBlue px-6 py-10 text-white shadow-lg relative overflow-hidden">
             <div className="absolute right-0 top-0 h-full w-1/3 bg-white/5 skew-x-12 transform translate-x-10"></div>
             <div className="max-w-7xl mx-auto relative z-10">
                 <h2 className="text-3xl font-bold mb-2">Student Growth Overview</h2>
@@ -190,9 +189,9 @@ const CampusView: React.FC = () => {
                 <div className="mt-6 flex gap-3">
                     <button 
                         onClick={() => setIsAiOpen(true)}
-                        className="bg-white text-blue-700 px-5 py-2 rounded-full font-bold text-sm shadow-lg hover:bg-blue-50 transition flex items-center gap-2"
+                        className="bg-white text-vt-blue px-5 py-2 rounded-full font-bold text-sm shadow-lg hover:bg-blue-50 transition flex items-center gap-2"
                     >
-                        <Sparkles size={16} /> Launch EdAssist AI
+                        <Sparkles size={16} className="text-vt-gold"/> Launch EdAssist AI
                     </button>
                     
                     <button 
@@ -202,7 +201,7 @@ const CampusView: React.FC = () => {
                         <TrendingUp size={16} /> View Growth Report
                     </button>
 
-                    <button className="bg-blue-700/50 text-white border border-blue-400 px-5 py-2 rounded-full font-bold text-sm hover:bg-blue-700/70 transition flex items-center gap-2">
+                    <button className="bg-vt-darkBlue/50 text-white border border-vt-lightBlue px-5 py-2 rounded-full font-bold text-sm hover:bg-vt-darkBlue/70 transition flex items-center gap-2">
                         <Filter size={16} /> Filter Cohorts
                     </button>
                 </div>
@@ -222,7 +221,7 @@ const CampusView: React.FC = () => {
                     <div key={idx} className="bg-white p-5 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition flex items-center justify-between group">
                         <div>
                             <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">{stat.label}</p>
-                            <h3 className="text-2xl font-bold text-gray-800 mt-1 group-hover:text-blue-600 transition">{stat.value}</h3>
+                            <h3 className="text-2xl font-bold text-gray-800 mt-1 group-hover:text-vt-blue transition">{stat.value}</h3>
                         </div>
                         <div className={`p-3 rounded-xl bg-${stat.color}-50 text-${stat.color}-600`}>
                             <stat.icon size={24} />
@@ -241,7 +240,7 @@ const CampusView: React.FC = () => {
                             <h3 className="font-bold text-lg text-gray-800">Student Achievement vs. Growth</h3>
                             <p className="text-sm text-gray-500">Math - Grade 10 (NWEA MAP)</p>
                         </div>
-                        <button className="text-blue-600 text-sm font-medium hover:underline flex items-center gap-1">
+                        <button className="text-vt-blue text-sm font-medium hover:underline flex items-center gap-1">
                             <Download size={16} /> Export
                         </button>
                     </div>
@@ -252,7 +251,7 @@ const CampusView: React.FC = () => {
                             <div className="absolute top-2 right-2 text-xs font-bold text-green-600 bg-green-50 px-2 py-1 rounded border border-green-100 z-10">High Achievement / High Growth</div>
                             <div className="absolute bottom-2 left-2 text-xs font-bold text-red-600 bg-red-50 px-2 py-1 rounded border border-red-100 z-10">Low Achievement / Low Growth</div>
                             <div className="absolute top-2 left-2 text-xs font-bold text-yellow-600 bg-yellow-50 px-2 py-1 rounded border border-yellow-100 z-10">Low Achievement / High Growth</div>
-                            <div className="absolute bottom-2 right-2 text-xs font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded border border-blue-100 z-10 shadow-sm animate-pulse border-2 border-blue-200">
+                            <div className="absolute bottom-2 right-2 text-xs font-bold text-vt-blue bg-blue-50 px-2 py-1 rounded border border-blue-100 z-10 shadow-sm animate-pulse border-2 border-blue-200">
                                 Target: High Achievement / Low Growth
                             </div>
 
@@ -266,7 +265,7 @@ const CampusView: React.FC = () => {
                                             return (
                                                 <div className="bg-white p-3 border border-gray-200 shadow-lg rounded-lg text-sm">
                                                     <p className="font-bold text-gray-900">{payload[0].payload.name}</p>
-                                                    <p className="text-blue-600">Achievement: {payload[0].value}%</p>
+                                                    <p className="text-vt-blue">Achievement: {payload[0].value}%</p>
                                                     <p className="text-green-600">Growth: {payload[1].value}%</p>
                                                 </div>
                                             );
@@ -291,12 +290,12 @@ const CampusView: React.FC = () => {
                             </ResponsiveContainer>
                         </div>
                         <div className="mt-4 bg-blue-50 border border-blue-100 rounded-lg p-4 flex items-start gap-3">
-                            <AlertCircle className="text-blue-600 mt-0.5" size={18} />
+                            <AlertCircle className="text-vt-blue mt-0.5" size={18} />
                             <div>
-                                <h4 className="text-sm font-bold text-blue-900">Analysis Insight</h4>
-                                <p className="text-sm text-blue-800 mt-1">
+                                <h4 className="text-sm font-bold text-vt-darkBlue">Analysis Insight</h4>
+                                <p className="text-sm text-vt-blue mt-1">
                                     <strong>6 students</strong> are in the "High Achievement / Low Growth" quadrant (Red dots). These students are performing well but have stalled in progress. 
-                                    <button className="ml-2 underline font-bold text-blue-700 hover:text-blue-900">View Student List</button>
+                                    <button className="ml-2 underline font-bold text-vt-darkBlue hover:text-vt-blue">View Student List</button>
                                 </p>
                             </div>
                         </div>
@@ -322,7 +321,7 @@ const CampusView: React.FC = () => {
                                 {TEACHER_PULSE_DATA.map((teacher, idx) => (
                                     <tr key={idx} className="group hover:bg-slate-50 transition">
                                         <td className="p-3">
-                                            <div className="font-bold text-gray-800 group-hover:text-blue-600">{teacher.name}</div>
+                                            <div className="font-bold text-gray-800 group-hover:text-vt-blue">{teacher.name}</div>
                                             <div className="text-xs text-gray-400">{teacher.dept} • {teacher.students} Students</div>
                                         </td>
                                         <td className="p-3 text-center">
@@ -333,7 +332,7 @@ const CampusView: React.FC = () => {
                                         <td className="p-3 text-center">
                                             <button 
                                                 onClick={() => handleTeacherClick(teacher)}
-                                                className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-full transition"
+                                                className="p-1.5 text-gray-400 hover:text-vt-blue hover:bg-blue-50 rounded-full transition"
                                             >
                                                 <ArrowRight size={16} />
                                             </button>

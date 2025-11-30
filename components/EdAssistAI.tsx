@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { GoogleGenAI } from '@google/genai';
 import { Send, Sparkles, X, Loader2, AlertCircle, Download, Table as TableIcon } from 'lucide-react';
@@ -165,7 +164,7 @@ const EdAssistAI: React.FC<EdAssistAIProps> = ({ contextData, isOpen, onClose, i
               <div className="my-4 bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
                   <div className="flex justify-between items-center mb-4">
                       <h4 className="font-bold text-gray-700 text-sm">{title}</h4>
-                      <button onClick={() => downloadChartData(data)} className="text-blue-600 text-xs flex items-center gap-1 hover:underline">
+                      <button onClick={() => downloadChartData(data)} className="text-vt-blue text-xs flex items-center gap-1 hover:underline">
                           <Download size={12} /> Export Data
                       </button>
                   </div>
@@ -177,9 +176,9 @@ const EdAssistAI: React.FC<EdAssistAIProps> = ({ contextData, isOpen, onClose, i
                                   <XAxis dataKey="name" tick={{fontSize: 10}} />
                                   <YAxis tick={{fontSize: 10}} />
                                   <Tooltip contentStyle={{fontSize: '12px', borderRadius: '4px'}} cursor={{fill: '#f9fafb'}} />
-                                  <Bar dataKey="value" fill="#3b82f6" radius={[4, 4, 0, 0]}>
+                                  <Bar dataKey="value" fill="#004f8a" radius={[4, 4, 0, 0]}>
                                     {data.map((entry: any, index: number) => (
-                                        <Cell key={`cell-${index}`} fill={entry.fill || '#3b82f6'} />
+                                        <Cell key={`cell-${index}`} fill={entry.fill || '#004f8a'} />
                                     ))}
                                   </Bar>
                               </BarChart>
@@ -187,7 +186,7 @@ const EdAssistAI: React.FC<EdAssistAIProps> = ({ contextData, isOpen, onClose, i
                               <PieChart>
                                   <Pie data={data} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={60} fill="#8884d8" label={({name, percent}) => `${name} ${(percent * 100).toFixed(0)}%`}>
                                     {data.map((entry: any, index: number) => (
-                                        <Cell key={`cell-${index}`} fill={entry.fill || '#8884d8'} />
+                                        <Cell key={`cell-${index}`} fill={entry.fill || '#004f8a'} />
                                     ))}
                                   </Pie>
                                   <Tooltip />
@@ -198,7 +197,7 @@ const EdAssistAI: React.FC<EdAssistAIProps> = ({ contextData, isOpen, onClose, i
                                   <XAxis dataKey="name" tick={{fontSize: 10}} />
                                   <YAxis tick={{fontSize: 10}} />
                                   <Tooltip contentStyle={{fontSize: '12px', borderRadius: '4px'}} />
-                                  <Line type="monotone" dataKey="value" stroke="#3b82f6" strokeWidth={2} dot={{r: 3}} />
+                                  <Line type="monotone" dataKey="value" stroke="#004f8a" strokeWidth={2} dot={{r: 3}} />
                               </LineChart>
                           )}
                       </ResponsiveContainer>
@@ -263,7 +262,7 @@ const EdAssistAI: React.FC<EdAssistAIProps> = ({ contextData, isOpen, onClose, i
                                 <span className="text-xs font-bold text-gray-500 flex items-center gap-1"><TableIcon size={12}/> Data Table</span>
                                 <button 
                                     onClick={() => downloadTableAsCSV(tableRows)}
-                                    className="text-xs text-blue-600 flex items-center gap-1 hover:underline font-medium"
+                                    className="text-xs text-vt-blue flex items-center gap-1 hover:underline font-medium"
                                 >
                                     <Download size={12} /> Export CSV
                                 </button>
@@ -313,7 +312,7 @@ const EdAssistAI: React.FC<EdAssistAIProps> = ({ contextData, isOpen, onClose, i
                         <span className="text-xs font-bold text-gray-500 flex items-center gap-1"><TableIcon size={12}/> Data Table</span>
                         <button 
                             onClick={() => downloadTableAsCSV(tableRows)}
-                            className="text-xs text-blue-600 flex items-center gap-1 hover:underline font-medium"
+                            className="text-xs text-vt-blue flex items-center gap-1 hover:underline font-medium"
                         >
                             <Download size={12} /> Export CSV
                         </button>
@@ -349,9 +348,9 @@ const EdAssistAI: React.FC<EdAssistAIProps> = ({ contextData, isOpen, onClose, i
       }`}
     >
       {/* Header */}
-      <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-4 flex justify-between items-center text-white">
+      <div className="bg-vt-blue p-4 flex justify-between items-center text-white">
         <div className="flex items-center space-x-2">
-          <Sparkles size={20} className="text-yellow-300" />
+          <Sparkles size={20} className="text-vt-gold" />
           <h2 className="font-semibold">EdAssist AI</h2>
         </div>
         <button onClick={onClose} className="hover:bg-white/20 p-1 rounded-full transition">
@@ -369,7 +368,7 @@ const EdAssistAI: React.FC<EdAssistAIProps> = ({ contextData, isOpen, onClose, i
             <div
               className={`max-w-[90%] p-3 rounded-2xl shadow-sm ${
                 msg.role === 'user'
-                  ? 'bg-blue-600 text-white rounded-br-none text-sm'
+                  ? 'bg-vt-blue text-white rounded-br-none text-sm'
                   : 'bg-white text-gray-800 border border-gray-200 rounded-bl-none'
               }`}
             >
@@ -380,7 +379,7 @@ const EdAssistAI: React.FC<EdAssistAIProps> = ({ contextData, isOpen, onClose, i
         {loading && (
           <div className="flex justify-start">
             <div className="bg-white p-3 rounded-2xl rounded-bl-none border border-gray-200 shadow-sm flex items-center space-x-2">
-              <Loader2 size={16} className="animate-spin text-blue-600" />
+              <Loader2 size={16} className="animate-spin text-vt-blue" />
               <span className="text-xs text-gray-500">EdAssist is thinking...</span>
             </div>
           </div>
@@ -395,20 +394,20 @@ const EdAssistAI: React.FC<EdAssistAIProps> = ({ contextData, isOpen, onClose, i
 
       {/* Input */}
       <div className="p-4 bg-white border-t border-gray-200">
-        <div className="flex items-center space-x-2 bg-gray-100 rounded-full px-4 py-2 focus-within:ring-2 focus-within:ring-blue-500 transition">
+        <div className="flex items-center space-x-2 bg-vt-grey rounded-full px-4 py-2 focus-within:ring-2 focus-within:ring-vt-blue transition border border-vt-borderGrey">
           <input
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleSend()}
             placeholder="Ask about differentiation, lesson plans..."
-            className="flex-1 bg-transparent outline-none text-sm text-gray-700"
+            className="flex-1 bg-transparent outline-none text-sm text-vt-textGrey"
           />
           <button
             onClick={() => handleSend()}
             disabled={loading}
             className={`p-1.5 rounded-full transition ${
-              input ? 'bg-blue-600 text-white hover:bg-blue-700' : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+              input ? 'bg-vt-blue text-white hover:bg-vt-darkBlue' : 'bg-gray-300 text-gray-500 cursor-not-allowed'
             }`}
           >
             <Send size={16} />

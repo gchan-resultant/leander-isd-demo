@@ -180,7 +180,7 @@ const PilotView: React.FC = () => {
       {/* Looker Studio Toolbar Simulation */}
       <div className="bg-white border-b border-gray-300 px-4 py-3 flex justify-between items-center mb-6 shadow-sm sticky top-0 z-20 rounded-lg">
         <div className="flex items-center gap-3">
-           <div className="h-8 w-8 bg-blue-600 rounded flex items-center justify-center text-white font-bold text-xs shadow-sm">
+           <div className="h-8 w-8 bg-vt-blue rounded flex items-center justify-center text-white font-bold text-xs shadow-sm">
               <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" strokeWidth="3" fill="none" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
            </div>
            <div className="h-6 w-px bg-gray-300 mx-1"></div>
@@ -222,7 +222,7 @@ const PilotView: React.FC = () => {
                 </div>
                 <button 
                     onClick={() => setActivePage('overview')}
-                    className={`w-full flex items-center justify-between p-3 text-sm font-medium transition border-l-4 ${activePage === 'overview' ? 'bg-blue-50 text-blue-700 border-blue-600' : 'text-gray-600 hover:bg-gray-50 border-transparent'}`}
+                    className={`w-full flex items-center justify-between p-3 text-sm font-medium transition border-l-4 ${activePage === 'overview' ? 'bg-vt-blue/10 text-vt-blue border-vt-blue' : 'text-gray-600 hover:bg-gray-50 border-transparent'}`}
                 >
                     <div className="flex items-center gap-3">
                         <LayoutGrid size={16} /> District Overview
@@ -231,7 +231,7 @@ const PilotView: React.FC = () => {
                 </button>
                 <button 
                     onClick={() => setActivePage('attendance')}
-                    className={`w-full flex items-center justify-between p-3 text-sm font-medium transition border-l-4 ${activePage === 'attendance' ? 'bg-blue-50 text-blue-700 border-blue-600' : 'text-gray-600 hover:bg-gray-50 border-transparent'}`}
+                    className={`w-full flex items-center justify-between p-3 text-sm font-medium transition border-l-4 ${activePage === 'attendance' ? 'bg-vt-blue/10 text-vt-blue border-vt-blue' : 'text-gray-600 hover:bg-gray-50 border-transparent'}`}
                 >
                     <div className="flex items-center gap-3">
                         <Clock size={16} /> Attendance Insights
@@ -240,7 +240,7 @@ const PilotView: React.FC = () => {
                 </button>
                 <button 
                     onClick={() => setActivePage('discipline')}
-                    className={`w-full flex items-center justify-between p-3 text-sm font-medium transition border-l-4 ${activePage === 'discipline' ? 'bg-blue-50 text-blue-700 border-blue-600' : 'text-gray-600 hover:bg-gray-50 border-transparent'}`}
+                    className={`w-full flex items-center justify-between p-3 text-sm font-medium transition border-l-4 ${activePage === 'discipline' ? 'bg-vt-blue/10 text-vt-blue border-vt-blue' : 'text-gray-600 hover:bg-gray-50 border-transparent'}`}
                 >
                     <div className="flex items-center gap-3">
                         <AlertCircle size={16} /> Behavior & Discipline
@@ -260,7 +260,7 @@ const PilotView: React.FC = () => {
                     <select 
                         value={year}
                         onChange={(e) => setYear(e.target.value)}
-                        className="w-full bg-gray-50 border border-gray-300 rounded px-2 py-1.5 text-sm focus:ring-2 focus:ring-blue-100 outline-none"
+                        className="w-full bg-vt-grey border border-vt-borderGrey rounded px-2 py-1.5 text-sm focus:ring-2 focus:ring-vt-lightBlue outline-none text-vt-textGrey"
                     >
                         <option>2024-2025</option>
                         <option>2023-2024</option>
@@ -272,7 +272,7 @@ const PilotView: React.FC = () => {
                     <select 
                         value={campus}
                         onChange={(e) => setCampus(e.target.value)}
-                        className="w-full bg-gray-50 border border-gray-300 rounded px-2 py-1.5 text-sm focus:ring-2 focus:ring-blue-100 outline-none"
+                        className="w-full bg-vt-grey border border-vt-borderGrey rounded px-2 py-1.5 text-sm focus:ring-2 focus:ring-vt-lightBlue outline-none text-vt-textGrey"
                     >
                         <option>All Campuses</option>
                         <option>Rouse HS</option>
@@ -286,7 +286,7 @@ const PilotView: React.FC = () => {
                     <select 
                         value={grade}
                         onChange={(e) => setGrade(e.target.value)}
-                        className="w-full bg-gray-50 border border-gray-300 rounded px-2 py-1.5 text-sm focus:ring-2 focus:ring-blue-100 outline-none"
+                        className="w-full bg-vt-grey border border-vt-borderGrey rounded px-2 py-1.5 text-sm focus:ring-2 focus:ring-vt-lightBlue outline-none text-vt-textGrey"
                     >
                         <option>All Grades</option>
                         <option>High School (9-12)</option>
@@ -308,7 +308,7 @@ const PilotView: React.FC = () => {
           <div className="flex-1 bg-gray-50 border border-gray-200 min-h-[800px] shadow-inner p-6 md:p-8 rounded-lg animate-fadeIn">
               
               {/* Header Inside Canvas */}
-              <div className="flex justify-between items-end border-b-2 border-blue-600 pb-2 mb-6">
+              <div className="flex justify-between items-end border-b-2 border-vt-blue pb-2 mb-6">
                  <div>
                      <h2 className="text-2xl font-bold text-slate-800">
                         {activePage === 'overview' && 'District Executive Summary'}
@@ -330,7 +330,7 @@ const PilotView: React.FC = () => {
                 <div className="space-y-6">
                     {/* Scorecards */}
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                        <div className="bg-white p-4 rounded shadow-sm border-t-4 border-t-blue-500">
+                        <div className="bg-white p-4 rounded shadow-sm border-t-4 border-t-vt-blue">
                             <div className="text-gray-500 text-[10px] font-bold uppercase tracking-wider">Total Enrollment</div>
                             <div className="text-3xl font-bold text-slate-800 my-1">{dashboardData.enrollmentTotal.toLocaleString()}</div>
                             <div className="text-xs text-gray-400">Active Students</div>
@@ -363,15 +363,15 @@ const PilotView: React.FC = () => {
                                     <AreaChart data={dashboardData.enrollmentTrend} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
                                         <defs>
                                             <linearGradient id="colorEnroll" x1="0" y1="0" x2="0" y2="1">
-                                                <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.1}/>
-                                                <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
+                                                <stop offset="5%" stopColor="#004f8a" stopOpacity={0.1}/>
+                                                <stop offset="95%" stopColor="#004f8a" stopOpacity={0}/>
                                             </linearGradient>
                                         </defs>
                                         <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{fontSize: 12}} />
                                         <YAxis domain={['dataMin - 50', 'dataMax + 50']} axisLine={false} tickLine={false} tick={{fontSize: 12}} />
                                         <CartesianGrid strokeDasharray="3 3" vertical={false} />
                                         <Tooltip contentStyle={{borderRadius: '4px', fontSize: '12px'}} />
-                                        <Area type="monotone" dataKey="value" stroke="#3b82f6" strokeWidth={2} fillOpacity={1} fill="url(#colorEnroll)" />
+                                        <Area type="monotone" dataKey="value" stroke="#004f8a" strokeWidth={2} fillOpacity={1} fill="url(#colorEnroll)" />
                                     </AreaChart>
                                 </ResponsiveContainer>
                             </div>
@@ -393,7 +393,7 @@ const PilotView: React.FC = () => {
                                             dataKey="value"
                                         >
                                             {dashboardData.demographicData.map((entry, index) => (
-                                                <Cell key={`cell-${index}`} fill={entry.color} />
+                                                <Cell key={`cell-${index}`} fill={entry.color === '#3b82f6' ? '#004f8a' : entry.color} />
                                             ))}
                                         </Pie>
                                         <Tooltip contentStyle={{fontSize: '12px', borderRadius: '4px'}} />
@@ -483,7 +483,7 @@ const PilotView: React.FC = () => {
                                         <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{fontSize: 12}} />
                                         <YAxis axisLine={false} tickLine={false} tick={{fontSize: 12}} />
                                         <Tooltip contentStyle={{borderRadius: '4px', fontSize: '12px'}} cursor={{fill: '#f3f4f6'}} />
-                                        <Bar dataKey="incidents" fill="#6366f1" radius={[4, 4, 0, 0]} barSize={40} />
+                                        <Bar dataKey="incidents" fill="#004f8a" radius={[4, 4, 0, 0]} barSize={40} />
                                     </BarChart>
                                 </ResponsiveContainer>
                             </div>
@@ -505,7 +505,7 @@ const PilotView: React.FC = () => {
                                             dataKey="value"
                                         >
                                             {dashboardData.disciplineTypes.map((entry, index) => (
-                                                <Cell key={`cell-${index}`} fill={entry.color} />
+                                                <Cell key={`cell-${index}`} fill={entry.color === '#3b82f6' ? '#004f8a' : entry.color} />
                                             ))}
                                         </Pie>
                                         <Tooltip contentStyle={{fontSize: '12px', borderRadius: '4px'}} />
@@ -520,7 +520,7 @@ const PilotView: React.FC = () => {
                     <div className="bg-white rounded shadow-sm border border-gray-200">
                         <h4 className="text-sm font-bold text-gray-600 p-4 border-b bg-gray-50 rounded-t flex justify-between items-center">
                             <span>Recent Incident Log</span>
-                            <button className="text-blue-600 text-xs flex items-center gap-1 hover:underline"><Download size={12}/> Export CSV</button>
+                            <button className="text-vt-blue text-xs flex items-center gap-1 hover:underline"><Download size={12}/> Export CSV</button>
                         </h4>
                         <div className="overflow-x-auto">
                             <table className="w-full text-xs text-left text-gray-600">
@@ -545,7 +545,7 @@ const PilotView: React.FC = () => {
                                         <td className="px-4 py-3">Oct 23, 2025</td>
                                         <td className="px-4 py-3 font-medium text-gray-900">#99283</td>
                                         <td className="px-4 py-3">Leander HS</td>
-                                        <td className="px-4 py-3"><span className="text-blue-600 bg-blue-50 px-2 py-0.5 rounded font-medium">Excessive Tardy</span></td>
+                                        <td className="px-4 py-3"><span className="text-vt-blue bg-blue-50 px-2 py-0.5 rounded font-medium">Excessive Tardy</span></td>
                                         <td className="px-4 py-3">Detention</td>
                                     </tr>
                                     <tr className="hover:bg-gray-50">

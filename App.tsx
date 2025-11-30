@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { UserRole } from './types';
 import RoleSwitcher from './components/RoleSwitcher';
@@ -54,26 +53,26 @@ const App: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col relative">
       {/* Navigation Bar */}
-      <nav className="bg-white border-b border-gray-200 sticky top-0 z-50">
+      <nav className="bg-vt-blue border-b border-vt-darkBlue sticky top-0 z-50 shadow-md">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
           
           {/* Version Selector / Logo Area */}
           <div className="relative">
             <button 
                 onClick={toggleMenu}
-                className="flex items-center space-x-3 hover:bg-gray-50 p-2 rounded-lg transition focus:outline-none focus:ring-2 focus:ring-blue-100"
+                className="flex items-center space-x-3 hover:bg-vt-darkBlue p-2 rounded-lg transition focus:outline-none focus:ring-2 focus:ring-vt-lightBlue text-white"
             >
-                <div className={`p-1.5 rounded-lg transition-colors ${appVersion === 'future' ? 'bg-blue-600' : 'bg-indigo-600'}`}>
-                    {appVersion === 'future' ? <Rocket className="text-white" size={20} /> : <LayoutDashboard className="text-white" size={20} />}
+                <div className={`p-1.5 rounded-lg transition-colors bg-white/10`}>
+                    {appVersion === 'future' ? <Rocket className="text-vt-gold" size={20} /> : <LayoutDashboard className="text-vt-gold" size={20} />}
                 </div>
                 <div className="text-left">
                     <div className="flex items-center gap-2">
-                        <span className="text-lg font-bold text-gray-900">
+                        <span className="text-lg font-bold text-white">
                         ClearPath EDU
                         </span>
-                        <ChevronDown size={16} className="text-gray-400" />
+                        <ChevronDown size={16} className="text-gray-300" />
                     </div>
-                    <div className="text-xs font-medium text-blue-600 uppercase tracking-wider">
+                    <div className="text-xs font-medium text-gray-300 uppercase tracking-wider">
                         {appVersion === 'future' ? 'Future Vision (Full)' : 'Pilot (MVP)'}
                     </div>
                 </div>
@@ -81,31 +80,31 @@ const App: React.FC = () => {
 
             {/* Dropdown Menu */}
             {isMenuOpen && (
-                <div className="absolute top-full left-0 mt-2 w-72 bg-white rounded-xl shadow-2xl border border-gray-100 overflow-hidden animate-fadeIn">
+                <div className="absolute top-full left-0 mt-2 w-72 bg-vt-blue rounded-xl shadow-2xl border border-vt-darkBlue overflow-hidden animate-fadeIn z-50">
                     <div className="p-2 space-y-1">
                         <button 
                             onClick={() => selectVersion('pilot')}
-                            className={`w-full flex items-start p-3 rounded-lg transition ${appVersion === 'pilot' ? 'bg-indigo-50' : 'hover:bg-gray-50'}`}
+                            className={`w-full flex items-start p-3 rounded-lg transition ${appVersion === 'pilot' ? 'bg-vt-darkBlue' : 'hover:bg-vt-lightBlue'}`}
                         >
                             <div className="mt-1">
-                                {appVersion === 'pilot' ? <Check size={16} className="text-indigo-600"/> : <div className="w-4" />}
+                                {appVersion === 'pilot' ? <Check size={16} className="text-vt-gold"/> : <div className="w-4" />}
                             </div>
                             <div className="ml-3 text-left">
-                                <p className={`font-bold text-sm ${appVersion === 'pilot' ? 'text-indigo-700' : 'text-gray-800'}`}>Pilot (MVP)</p>
-                                <p className="text-xs text-gray-500 mt-0.5">Looker Studio Dashboard & Early Warning Indicators</p>
+                                <p className={`font-bold text-sm text-white`}>Pilot (MVP)</p>
+                                <p className="text-xs text-gray-300 mt-0.5">Looker Studio Dashboard & Early Warning Indicators</p>
                             </div>
                         </button>
 
                         <button 
                             onClick={() => selectVersion('future')}
-                            className={`w-full flex items-start p-3 rounded-lg transition ${appVersion === 'future' ? 'bg-blue-50' : 'hover:bg-gray-50'}`}
+                            className={`w-full flex items-start p-3 rounded-lg transition ${appVersion === 'future' ? 'bg-vt-darkBlue' : 'hover:bg-vt-lightBlue'}`}
                         >
                             <div className="mt-1">
-                                {appVersion === 'future' ? <Check size={16} className="text-blue-600"/> : <div className="w-4" />}
+                                {appVersion === 'future' ? <Check size={16} className="text-vt-gold"/> : <div className="w-4" />}
                             </div>
                             <div className="ml-3 text-left">
-                                <p className={`font-bold text-sm ${appVersion === 'future' ? 'text-blue-700' : 'text-gray-800'}`}>Future Vision (Full)</p>
-                                <p className="text-xs text-gray-500 mt-0.5">Comprehensive App, AI Integration, & Data Backpacks</p>
+                                <p className={`font-bold text-sm text-white`}>Future Vision (Full)</p>
+                                <p className="text-xs text-gray-300 mt-0.5">Comprehensive App, AI Integration, & Data Backpacks</p>
                             </div>
                         </button>
                     </div>
@@ -114,21 +113,21 @@ const App: React.FC = () => {
           </div>
 
           {/* Right Side User Info & Demo Toggle */}
-          <div className="flex items-center space-x-4">
-            <div className="hidden md:flex flex-col items-end border-l border-gray-200 pl-4">
+          <div className="flex items-center space-x-4 text-white">
+            <div className="hidden md:flex flex-col items-end border-l border-vt-lightBlue pl-4">
                {appVersion === 'future' ? (
                    <>
-                    <span className="text-xs font-bold text-gray-400 uppercase">Current View</span>
-                    <span className="text-sm font-medium text-gray-800">{role}</span>
+                    <span className="text-xs font-bold text-gray-300 uppercase">Current View</span>
+                    <span className="text-sm font-medium">{role}</span>
                    </>
                ) : (
                    <>
-                    <span className="text-xs font-bold text-gray-400 uppercase">Logged In As</span>
-                    <span className="text-sm font-medium text-gray-800">District Admin</span>
+                    <span className="text-xs font-bold text-gray-300 uppercase">Logged In As</span>
+                    <span className="text-sm font-medium">District Admin</span>
                    </>
                )}
             </div>
-            <div className="w-8 h-8 rounded-full bg-gray-200 overflow-hidden border border-gray-300">
+            <div className="w-8 h-8 rounded-full bg-vt-lightBlue overflow-hidden border border-vt-darkBlue">
                 <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${appVersion === 'future' ? role : 'admin'}`} alt="Avatar" className="w-full h-full" />
             </div>
           </div>
@@ -154,7 +153,7 @@ const App: React.FC = () => {
       />
 
       {/* Demo Watermark */}
-      <div className="fixed bottom-2 right-4 text-[10px] text-gray-300 pointer-events-none z-0">
+      <div className="fixed bottom-2 right-4 text-[10px] text-gray-400 pointer-events-none z-0">
         Leander ISD Demo Build v0.2 • {appVersion === 'future' ? 'Phase 2' : 'Phase 1'}
       </div>
     </div>
